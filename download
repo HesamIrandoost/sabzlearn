@@ -1,0 +1,294 @@
+openapi: 3.0.3
+info:
+  title: API Documentation - آموزشگاه آنلاین
+  version: 1.0.0
+  description: مستندات کامل API سایت دوره‌های آموزشی
+paths:
+  /account/api/change-password/:
+    put:
+      operationId: account_api_change_password_update
+      description: تغییر رمز عبور
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+        required: true
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePassword'
+          description: ''
+    patch:
+      operationId: account_api_change_password_partial_update
+      description: تغییر رمز عبور
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePassword'
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePassword'
+          description: ''
+  /account/api/login/:
+    post:
+      operationId: account_api_login_create
+      description: ورود کاربر با شماره موبایل و رمز عبور
+      tags:
+      - account
+      security:
+      - BasicAuth: []
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /account/api/logout/:
+    post:
+      operationId: account_api_logout_create
+      description: خروج از سیستم
+      tags:
+      - account
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /account/api/profile/:
+    get:
+      operationId: account_api_profile_retrieve
+      description: دریافت و بروزرسانی پروفایل کاربر
+      tags:
+      - account
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: account_api_profile_update
+      description: دریافت و بروزرسانی پروفایل کاربر
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: account_api_profile_partial_update
+      description: دریافت و بروزرسانی پروفایل کاربر
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /account/api/register/:
+    post:
+      operationId: account_api_register_create
+      description: ثبت‌نام کاربر جدید (فقط دانشجو)
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      security:
+      - BasicAuth: []
+      - TokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistration'
+          description: ''
+  /account/api/status/:
+    get:
+      operationId: account_api_status_retrieve
+      description: بررسی وضعیت لاگین کاربر فعلی
+      tags:
+      - account
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      - BasicAuth: []
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    ChangePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+        confirm_new_password:
+          type: string
+      required:
+      - confirm_new_password
+      - new_password
+      - old_password
+    PatchedChangePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+        confirm_new_password:
+          type: string
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          maxLength: 11
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_instructor_approved:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+    RoleEnum:
+      enum:
+      - student
+      - instructor
+      - admin
+      type: string
+      description: |-
+        * `student` - Student
+        * `instructor` - Instructor
+        * `admin` - Admin
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          maxLength: 11
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_instructor_approved:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - id
+      - is_instructor_approved
+      - phone
+    UserRegistration:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 11
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - password_confirm
+      - phone
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

@@ -1,0 +1,861 @@
+swagger: '2.0'
+info:
+  title: SabzLearn API
+  description: مستندات API سایت آموزشی سبزلرن
+  termsOfService: https://www.google.com/policies/terms/
+  contact:
+    email: contact@sabzlearn.local
+  license:
+    name: BSD License
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: /api
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: 'نحوه استفاده: "Bearer {token}" را وارد کنید'
+security:
+- Bearer: []
+paths:
+  /account/change-password/:
+    post:
+      operationId: account_change-password_create
+      summary: تغییر رمز
+      description: تغییر رمز عبور کاربر
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ChangePassword'
+      responses:
+        '200':
+          description: تغییر رمز موفق
+        '400':
+          description: اطلاعات نامعتبر
+        '401':
+          description: احراز هویت نشده
+      tags:
+      - Profile
+    parameters: []
+  /account/login/:
+    post:
+      operationId: account_login_create
+      summary: ورود
+      description: ورود به سیستم با شماره موبایل و رمز عبور
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/UserLogin'
+      responses:
+        '200':
+          description: ورود موفق
+        '400':
+          description: اطلاعات نامعتبر
+      tags:
+      - Authentication
+    parameters: []
+  /account/logout/:
+    post:
+      operationId: account_logout_create
+      summary: خروج
+      description: خروج از سیستم و حذف توکن
+      parameters: []
+      responses:
+        '200':
+          description: خروج موفق
+        '401':
+          description: احراز هویت نشده
+      tags:
+      - Authentication
+    parameters: []
+  /account/profile/:
+    get:
+      operationId: account_profile_read
+      description: دریافت و بروزرسانی پروفایل کاربر
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/User'
+      tags:
+      - account
+    put:
+      operationId: account_profile_update
+      description: دریافت و بروزرسانی پروفایل کاربر
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/User'
+      tags:
+      - account
+    patch:
+      operationId: account_profile_partial_update
+      description: دریافت و بروزرسانی پروفایل کاربر
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/User'
+      tags:
+      - account
+    parameters: []
+  /account/register/:
+    post:
+      operationId: account_register_create
+      description: ثبت‌نام کاربر جدید (فقط دانشجو)
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/UserRegistration'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/UserRegistration'
+      tags:
+      - account
+    parameters: []
+  /account/status/:
+    get:
+      operationId: account_status_list
+      summary: وضعیت کاربر
+      description: بررسی وضعیت احراز هویت کاربر
+      parameters: []
+      responses:
+        '200':
+          description: کاربر احراز هویت شده
+        '401':
+          description: احراز هویت نشده
+      tags:
+      - Authentication
+    parameters: []
+  /course/:
+    get:
+      operationId: course_list
+      description: لیست همه دوره‌های منتشر شده
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CourseList'
+      tags:
+      - course
+    parameters: []
+  /course/enroll/{course_id}/:
+    post:
+      operationId: course_enroll_create
+      description: ثبت‌نام در دوره (خرید دوره)
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - course
+    parameters:
+    - name: course_id
+      in: path
+      required: true
+      type: string
+  /course/instructor/courses/:
+    get:
+      operationId: course_instructor_courses_list
+      description: لیست دوره‌های مدرس (و ایجاد دوره جدید)
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CourseList'
+      tags:
+      - course
+    post:
+      operationId: course_instructor_courses_create
+      description: لیست دوره‌های مدرس (و ایجاد دوره جدید)
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CourseCreateUpdate'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/CourseCreateUpdate'
+      tags:
+      - course
+    parameters: []
+  /course/instructor/courses/{course_id}/sections/:
+    get:
+      operationId: course_instructor_courses_sections_list
+      description: لیست و ایجاد سکشن‌های یک دوره
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Section'
+      tags:
+      - course
+    post:
+      operationId: course_instructor_courses_sections_create
+      description: لیست و ایجاد سکشن‌های یک دوره
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Section'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Section'
+      tags:
+      - course
+    parameters:
+    - name: course_id
+      in: path
+      required: true
+      type: string
+  /course/instructor/courses/{slug}/:
+    get:
+      operationId: course_instructor_courses_read
+      description: مدیریت یک دوره توسط مدرس
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CourseCreateUpdate'
+      tags:
+      - course
+    put:
+      operationId: course_instructor_courses_update
+      description: مدیریت یک دوره توسط مدرس
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CourseCreateUpdate'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CourseCreateUpdate'
+      tags:
+      - course
+    patch:
+      operationId: course_instructor_courses_partial_update
+      description: مدیریت یک دوره توسط مدرس
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CourseCreateUpdate'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CourseCreateUpdate'
+      tags:
+      - course
+    delete:
+      operationId: course_instructor_courses_delete
+      description: مدیریت یک دوره توسط مدرس
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - course
+    parameters:
+    - name: slug
+      in: path
+      required: true
+      type: string
+  /course/instructor/sections/{id}/:
+    get:
+      operationId: course_instructor_sections_read
+      description: مدیریت یک سکشن
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Section'
+      tags:
+      - course
+    put:
+      operationId: course_instructor_sections_update
+      description: مدیریت یک سکشن
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Section'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Section'
+      tags:
+      - course
+    patch:
+      operationId: course_instructor_sections_partial_update
+      description: مدیریت یک سکشن
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Section'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Section'
+      tags:
+      - course
+    delete:
+      operationId: course_instructor_sections_delete
+      description: مدیریت یک سکشن
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - course
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /course/instructor/sections/{section_id}/videos/:
+    get:
+      operationId: course_instructor_sections_videos_list
+      description: لیست و ایجاد ویدیوهای یک سکشن
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Video'
+      tags:
+      - course
+    post:
+      operationId: course_instructor_sections_videos_create
+      description: لیست و ایجاد ویدیوهای یک سکشن
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Video'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Video'
+      tags:
+      - course
+    parameters:
+    - name: section_id
+      in: path
+      required: true
+      type: string
+  /course/my-courses/:
+    get:
+      operationId: course_my-courses_list
+      description: دوره‌هایی که دانشجو خریداری کرده
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Enrollment'
+      tags:
+      - course
+    parameters: []
+  /course/progress/{course_id}/video/{video_id}/:
+    post:
+      operationId: course_progress_video_create
+      description: بروزرسانی پیشرفت تماشای ویدیو
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - course
+    parameters:
+    - name: course_id
+      in: path
+      required: true
+      type: string
+    - name: video_id
+      in: path
+      required: true
+      type: string
+  /course/{course_slug}/video/{video_id}/:
+    get:
+      operationId: course_video_read
+      description: دسترسی به محتوای دوره (بررسی ثبت‌نام یا رایگان بودن)
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - course
+    parameters:
+    - name: course_slug
+      in: path
+      required: true
+      type: string
+    - name: video_id
+      in: path
+      required: true
+      type: string
+  /course/{slug}/:
+    get:
+      operationId: course_read
+      description: جزییات یک دوره
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CourseDetail'
+      tags:
+      - course
+    parameters:
+    - name: slug
+      in: path
+      required: true
+      type: string
+definitions:
+  ChangePassword:
+    required:
+    - old_password
+    - new_password
+    - confirm_new_password
+    type: object
+    properties:
+      old_password:
+        title: Old password
+        type: string
+        minLength: 1
+      new_password:
+        title: New password
+        type: string
+        minLength: 1
+      confirm_new_password:
+        title: Confirm new password
+        type: string
+        minLength: 1
+  UserLogin:
+    required:
+    - phone
+    - password
+    type: object
+    properties:
+      phone:
+        title: Phone
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+  User:
+    required:
+    - phone
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      phone:
+        title: Phone
+        type: string
+        maxLength: 11
+        minLength: 1
+      email:
+        title: Email
+        type: string
+        format: email
+        maxLength: 254
+        x-nullable: true
+      role:
+        title: Role
+        type: string
+        enum:
+        - student
+        - instructor
+        - admin
+      is_instructor_approved:
+        title: Is instructor approved
+        type: boolean
+        readOnly: true
+      date_joined:
+        title: Date joined
+        type: string
+        format: date-time
+        readOnly: true
+  UserRegistration:
+    required:
+    - phone
+    - password
+    - password_confirm
+    type: object
+    properties:
+      phone:
+        title: Phone
+        type: string
+        maxLength: 11
+        minLength: 1
+      email:
+        title: Email
+        type: string
+        format: email
+        maxLength: 254
+        x-nullable: true
+      password:
+        title: Password
+        type: string
+        minLength: 1
+      password_confirm:
+        title: Password confirm
+        type: string
+        minLength: 1
+  CourseList:
+    required:
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      slug:
+        title: Slug
+        type: string
+        format: slug
+        pattern: ^[-a-zA-Z0-9_]+$
+        maxLength: 255
+      instructor_phone:
+        title: Instructor phone
+        type: string
+        readOnly: true
+      price:
+        title: Price
+        description: قیمت به تومان
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      discount_percent:
+        title: Discount percent
+        type: integer
+        maximum: 100
+        minimum: 0
+      final_price:
+        title: Final price
+        type: string
+        readOnly: true
+      image:
+        title: Image
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+      is_published:
+        title: Is published
+        type: boolean
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  CourseCreateUpdate:
+    required:
+    - title
+    - description
+    type: object
+    properties:
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        minLength: 1
+      price:
+        title: Price
+        description: قیمت به تومان
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      discount_percent:
+        title: Discount percent
+        type: integer
+        maximum: 100
+        minimum: 0
+      image:
+        title: Image
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+      is_published:
+        title: Is published
+        type: boolean
+  Video:
+    required:
+    - title
+    - duration
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      video_file:
+        title: Video file
+        type: string
+        readOnly: true
+        format: uri
+      duration:
+        title: Duration
+        description: مدت زمان به ثانیه
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      duration_minutes:
+        title: Duration minutes
+        type: string
+        readOnly: true
+      is_free:
+        title: Is free
+        type: boolean
+      order:
+        title: Order
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  Section:
+    required:
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      order:
+        title: Order
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      total_duration:
+        title: Total duration
+        type: string
+        readOnly: true
+      videos:
+        type: array
+        items:
+          $ref: '#/definitions/Video'
+        readOnly: true
+  Enrollment:
+    required:
+    - course
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      course:
+        title: Course
+        type: integer
+      course_title:
+        title: Course title
+        type: string
+        readOnly: true
+      course_image:
+        title: Course image
+        type: string
+        readOnly: true
+      enrolled_at:
+        title: Enrolled at
+        type: string
+        format: date-time
+        readOnly: true
+      is_completed:
+        title: Is completed
+        type: boolean
+      completed_at:
+        title: Completed at
+        type: string
+        format: date-time
+        x-nullable: true
+      progress_percent:
+        title: Progress percent
+        type: string
+        readOnly: true
+  UserSimple:
+    required:
+    - phone
+    type: object
+    properties:
+      phone:
+        title: Phone
+        type: string
+        maxLength: 11
+        minLength: 1
+      email:
+        title: Email
+        type: string
+        format: email
+        maxLength: 254
+        x-nullable: true
+  CourseDetail:
+    required:
+    - title
+    - description
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      slug:
+        title: Slug
+        type: string
+        format: slug
+        pattern: ^[-a-zA-Z0-9_]+$
+        maxLength: 255
+      description:
+        title: Description
+        type: string
+        minLength: 1
+      instructor:
+        $ref: '#/definitions/UserSimple'
+      price:
+        title: Price
+        description: قیمت به تومان
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      discount_percent:
+        title: Discount percent
+        type: integer
+        maximum: 100
+        minimum: 0
+      final_price:
+        title: Final price
+        type: string
+        readOnly: true
+      image:
+        title: Image
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+      sections:
+        type: array
+        items:
+          $ref: '#/definitions/Section'
+        readOnly: true
+      total_duration:
+        title: Total duration
+        type: string
+        readOnly: true
+      is_published:
+        title: Is published
+        type: boolean
+      is_enrolled:
+        title: Is enrolled
+        type: string
+        readOnly: true
+      progress_percent:
+        title: Progress percent
+        type: string
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
