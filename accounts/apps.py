@@ -6,3 +6,5 @@ class AccountsConfig(AppConfig):
     
     def ready(self):
         import accounts.signals  # ثبت سیگنال‌ها
+
+

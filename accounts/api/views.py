@@ -11,10 +11,7 @@ from .serializers import (
     UserSerializer,
     StudentProfileSerializer,
     InstructorProfileSerializer,
-    ChangePasswordSerializer
-)
-from accounts.models import User, StudentProfile, InstructorProfile
-
+    ChangePasswordSerializer)
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -52,7 +49,7 @@ class RegisterAPIView(generics.CreateAPIView):
         
         return Response({
             # 'status': 'success',
-            'message': 'Registration successful',
+            'message': 'ثبت نام موفقیت امیز بود',
             'user': user.role,
             'token': token.key
             # 'data': {
@@ -258,7 +255,7 @@ class UserStatusAPIView(generics.GenericAPIView):
     بررسی وضعیت لاگین کاربر فعلی
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [BasicAuthentication, TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     
     @swagger_auto_schema(
         operation_description="بررسی وضعیت احراز هویت کاربر",

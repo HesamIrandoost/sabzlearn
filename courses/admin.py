@@ -5,7 +5,7 @@ from . import models
 
 @admin.register(models.Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['instructor', 'title', 'price', 'is_published']
+    list_display = ['pk', 'instructor', 'title', 'price', 'is_published']
 @admin.register(models.Enrollment)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['student', 'course', 'enrolled_at', 'is_completed']

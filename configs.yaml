@@ -1,0 +1,18 @@
+endpoints:
+  /api/account/register/                                           accounts:api_register
+  /api/account/status/                                             accounts:api_status
+  /api/course/                                                     courses:course_list
+  /api/course/<slug:course_slug>/video/<int:video_id>/             courses:course_content
+  /api/course/<slug:slug>/                                         courses:course_detail
+  /api/course/enroll/<int:course_id>/                              courses:enroll_course
+  /api/course/instructor/courses/                                  courses:instructor_courses
+  /api/course/instructor/courses/<int:course_id>/sections/         courses:section_list
+  /api/course/instructor/courses/<slug:slug>/                      courses:instructor_course_detail
+  /api/course/instructor/sections/<int:pk>/                        courses:section_detail
+  /api/course/instructor/sections/<int:section_id>/videos/         courses:video_list
+  /api/course/my-courses/                                          courses:my_courses
+  /api/course/progress/<int:course_id>/video/<int:video_id>/       courses:update_progress
+  /media/<path>   
+  /redoc/
+  /swagger.json/                                                     
+  /swagger/                                                   

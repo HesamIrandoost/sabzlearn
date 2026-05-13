@@ -83,6 +83,8 @@ class StudentProfile(models.Model):
 
 class InstructorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='instructor_profile')
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     profile_image = models.ImageField(upload_to="profiles/", null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     is_verified = models.BooleanField(default=False)

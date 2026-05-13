@@ -98,17 +98,6 @@ class ChangePasswordSerializer(serializers.Serializer):
     
     def validate(self, attrs):
         if attrs['new_password'] != attrs['confirm_new_password']:
-            raise serializers.ValidationError({"new_password": "new password and confirm donsent match"})
+            raise serializers.ValidationError({"new_password": "password and confirm donsent match"})
         return attrs
     
-
-
-
-
-
-
-
-
-
-
-

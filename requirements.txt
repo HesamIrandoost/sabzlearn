@@ -7,3 +7,6 @@ jsonschema-specifications==2025.9.1
 packaging==26.2
 pillow==12.2.0
 typing_extensions==4.15.0
+django-extensions
+factory-boy 
+faker

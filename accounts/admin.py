@@ -86,13 +86,13 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'wallet_balance')
+    list_display = ('pk','user', 'wallet_balance')
     search_fields = ('user__phone',)
     list_filter = ('wallet_balance',)
     
 @admin.register(InstructorProfile)
 class InstructorProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'is_verified', 'total_courses', 'total_students')
+    list_display = ('pk','user', 'is_verified', 'total_courses', 'total_students')
     list_filter = ('is_verified',)
     search_fields = ('user__phone', 'bio')
     list_editable = ('is_verified',)
