@@ -11,6 +11,7 @@
             <div class="avatar-placeholder" id="avatarPlaceholder">
                 👤
             </div>
+            <img id="profileImage" class="profile-image" style="display: none; width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem;" alt="عکس پروفایل">
             <h3 id="userPhone">-</h3>
             <span class="role-badge" id="userRole">-</span>
         </div>
@@ -51,6 +52,25 @@
                 <div class="info-row">
                     <span class="info-label">تاریخ عضویت:</span>
                     <span class="info-value" id="profileJoined">-</span>
+                </div>
+                <!-- اطلاعات مخصوص استادها -->
+                <div id="instructorInfo" style="display: none;">
+                    <div class="info-row">
+                        <span class="info-label">نام و نام خانوادگی:</span>
+                        <span class="info-value" id="instructorName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">بیوگرافی:</span>
+                        <span class="info-value" id="instructorBio">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">تعداد دوره‌ها:</span>
+                        <span class="info-value" id="totalCourses">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">تعداد دانشجوها:</span>
+                        <span class="info-value" id="totalStudents">-</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,6 +154,11 @@
     margin: 0 auto 1rem;
     font-size: 3rem;
     color: white;
+}
+
+.profile-image {
+    display: block;
+    margin: 0 auto 1rem;
 }
 
 .profile-avatar h3 {
@@ -305,11 +330,9 @@ document.querySelectorAll('.menu-item[data-tab]').forEach(item => {
         e.preventDefault();
         const tab = item.dataset.tab;
         
-        // Update active class
         document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         
-        // Show tab content
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         if (tab === 'info') document.getElementById('tabInfo').classList.add('active');
         if (tab === 'courses') document.getElementById('tabCourses').classList.add('active');
@@ -340,17 +363,47 @@ async function loadProfile() {
 
 function displayProfile(profile) {
     const user = profile.user;
+    const userRole = user.role;
     
+    // اطلاعات پایه
     document.getElementById('userPhone').textContent = user.phone;
-    document.getElementById('userRole').textContent = user.role === 'student' ? 'دانشجو' : 'مدرس';
+    document.getElementById('userRole').textContent = userRole === 'student' ? 'دانشجو' : 'مدرس';
     document.getElementById('profilePhone').textContent = user.phone;
     document.getElementById('profileEmail').textContent = user.email || 'ثبت نشده';
-    document.getElementById('profileRole').textContent = user.role === 'student' ? 'دانشجو' : 'مدرس';
+    document.getElementById('profileRole').textContent = userRole === 'student' ? 'دانشجو' : 'مدرس';
     document.getElementById('profileJoined').textContent = new Date(user.date_joined).toLocaleDateString('fa-IR');
     
-    // Set avatar placeholder
-    const avatar = document.getElementById('avatarPlaceholder');
-    avatar.textContent = user.phone.slice(-2);
+    // عکس پروفایل
+    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+    const profileImage = document.getElementById('profileImage');
+    
+    if (profile.profile_image) {
+        // اگر عکس وجود داشت، عکس رو نشون بده
+        avatarPlaceholder.style.display = 'none';
+        profileImage.style.display = 'block';
+        profileImage.src = profile.profile_image;
+        profileImage.onerror = () => {
+            // اگه عکس لود نشد، fallback به placeholder
+            avatarPlaceholder.style.display = 'flex';
+            profileImage.style.display = 'none';
+            avatarPlaceholder.textContent = user.phone.slice(-2);
+        };
+    } else {
+        avatarPlaceholder.style.display = 'flex';
+        profileImage.style.display = 'none';
+        avatarPlaceholder.textContent = user.phone.slice(-2);
+    }
+    
+    // اگر کاربر استاد بود، اطلاعات اضافی نشون بده
+    if (userRole === 'instructor' && profile) {
+        document.getElementById('instructorInfo').style.display = 'block';
+        document.getElementById('instructorName').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'نامشخص';
+        document.getElementById('instructorBio').textContent = profile.bio || 'بیوگرافی ثبت نشده';
+        document.getElementById('totalCourses').textContent = profile.total_courses || 0;
+        document.getElementById('totalStudents').textContent = profile.total_students || 0;
+    } else {
+        document.getElementById('instructorInfo').style.display = 'none';
+    }
 }
 
 // Load enrolled courses
@@ -365,6 +418,9 @@ async function loadEnrolledCourses() {
         if (response.ok) {
             const courses = await response.json();
             displayEnrolledCourses(courses);
+        } else if (response.status === 404) {
+            // اگه endpoint وجود نداشت
+            document.getElementById('enrolledCourses').innerHTML = '<div class="loading-state">هیچ دوره‌ای یافت نشد</div>';
         }
     } catch (error) {
         console.error('Error:', error);
@@ -381,7 +437,7 @@ function displayEnrolledCourses(courses) {
     }
     
     container.innerHTML = courses.map(course => `
-        <div class="enrolled-course-item">
+        <div class="enrolled-course-item" onclick="window.location.href='/course/${course.course_slug || course.id}/'">
             <div>
                 <div class="enrolled-course-title">${escapeHtml(course.course_title)}</div>
                 <div style="font-size: 0.8rem; color: #64748b;">تاریخ ثبت نام: ${new Date(course.enrolled_at).toLocaleDateString('fa-IR')}</div>
@@ -425,6 +481,9 @@ document.getElementById('changePasswordForm')?.addEventListener('submit', async 
             if (data.new_password) {
                 document.getElementById('newPasswordError').textContent = data.new_password[0];
             }
+            if (data.old_password) {
+                document.getElementById('oldPasswordError').textContent = data.old_password[0];
+            }
             if (data.non_field_errors) {
                 document.getElementById('passwordMessage').innerHTML = `
                     <div style="background: #dc2626; color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
@@ -435,6 +494,11 @@ document.getElementById('changePasswordForm')?.addEventListener('submit', async 
         }
     } catch (error) {
         console.error('Error:', error);
+        document.getElementById('passwordMessage').innerHTML = `
+            <div style="background: #dc2626; color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                ❌ خطا در ارتباط با سرور
+            </div>
+        `;
     }
 });
 
@@ -451,6 +515,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         console.error('Logout error:', error);
     } finally {
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_phone');
         document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         window.location.href = '/account/login/';
     }
