@@ -900,3 +900,168 @@ footer {
     font-size: 0.9rem;
     line-height: 1.5;
 }
+
+
+/* اضافه کن به style.css */
+
+/* ========== Pagination Styles ========== */
+.pagination-container {
+    margin-top: 3rem;
+    padding: 1rem;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pagination-btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+    background: #f8fafc;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.pagination-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-color: transparent;
+}
+
+.pagination-btn.disabled,
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-dots {
+    padding: 0 0.5rem;
+    color: var(--text-secondary);
+}
+
+.pagination-info {
+    margin-right: 1rem;
+    padding: 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Responsive Pagination */
+@media (max-width: 768px) {
+    .pagination-wrapper {
+        gap: 0.3rem;
+    }
+    
+    .pagination-btn {
+        min-width: 35px;
+        height: 35px;
+        padding: 0 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination-info {
+        width: 100%;
+        text-align: center;
+        margin-top: 1rem;
+        margin-right: 0;
+        padding-top: 1rem;
+        border-right: none;
+        border-top: 1px solid #e2e8f0;
+    }
+}
+
+/* دکمه‌های ناوبری سریع */
+.pagination-quick-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.pagination-input {
+    width: 70px;
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+}
+
+/* اسکرول به بالا */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-fast);
+    z-index: 100;
+}
+
+.scroll-top-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+}
+
+.scroll-top-btn.show {
+    display: flex;
+}
+
+
+.courses-grid {
+    animation: none;
+}
+
+.course-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+/* لودینگ سریع‌تر */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+}
+
+/* بهینه‌سازی برای لود سریع‌تر تصاویر */
+.course-img {
+    will-change: transform;
+}
+
+/* پرش سریع‌تر بین صفحات */
+.pagination-btn {
+    transition: all 0.15s ease;
+}

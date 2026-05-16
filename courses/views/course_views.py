@@ -4,13 +4,21 @@ from rest_framework import permissions
 from ..models import Course 
 from core.permissons import IsInstructor
 from django.db.models import Q
+from rest_framework.decorators import action
 
+# تستی
+# در views.py اضافه کن
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(vary_on_headers('Authorization'), name='dispatch')
 class CourseListView(generics.ListAPIView):
     """لیست همه دوره‌های منتشر شده"""
     serializer_class = CourseListSerializer
     permission_classes = [permissions.AllowAny]
-    
+    # pagination_class = PageNumberPagination
     def get_queryset(self):
         queryset = Course.objects.filter(is_published=True)
         
@@ -35,7 +43,6 @@ class CourseListView(generics.ListAPIView):
         queryset = queryset.order_by(ordering)
         
         return queryset
-    
 
 
 class CourseDetailView(generics.RetrieveAPIView):

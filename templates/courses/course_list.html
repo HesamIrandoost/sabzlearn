@@ -40,6 +40,7 @@
     </div>
 </div>
 
+<!-- در course_list.html، بعد از courses-grid اضافه کن -->
 <div class="courses-container">
     <div class="courses-header">
         <h2 class="section-title">
@@ -57,7 +58,6 @@
     <div id="error" class="error-state hidden">
         <i class="fas fa-exclamation-triangle"></i>
         <h3>خطا در دریافت اطلاعات</h3>
-        <p>مشکلی در ارتباط با سرور پیش آمده است</p>
         <button class="retry-btn" onclick="courseManager.fetchCourses()">
             <i class="fas fa-sync-alt"></i> تلاش مجدد
         </button>
@@ -65,17 +65,23 @@
     
     <div id="coursesGrid" class="courses-grid"></div>
     
+    <!-- container برای دکمه‌های صفحه‌بندی -->
+    <div id="paginationContainer" class="pagination-container"></div>
+    
     <div id="noResults" class="no-results hidden">
         <i class="fas fa-search"></i>
         <h3>هیچ دوره‌ای یافت نشد!</h3>
         <p>لطفاً فیلترهای دیگری را امتحان کنید</p>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Course Manager Class
+
+
+// در کلاس CourseManager - نسخه اصلاح شده کامل
 class CourseManager {
     constructor() {
         this.apiBase = 'http://127.0.0.1:8000';
@@ -83,8 +89,12 @@ class CourseManager {
             search: '',
             min_price: null,
             max_price: null,
-            ordering: '-created_at'
+            ordering: '-created_at',
+            page: 1
         };
+        this.totalPages = 1;
+        this.currentPage = 1;
+        this.totalCourses = 0;
         this.searchTimeout = null;
         this.init();
     }
@@ -110,6 +120,7 @@ class CourseManager {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.filters.search = e.target.value;
+                    this.filters.page = 1; // ریست به صفحه اول
                     this.fetchCourses();
                 }, 500);
             });
@@ -124,16 +135,46 @@ class CourseManager {
         if (this.filters.min_price) params.append('min_price', this.filters.min_price);
         if (this.filters.max_price) params.append('max_price', this.filters.max_price);
         if (this.filters.ordering) params.append('ordering', this.filters.ordering);
+        if (this.filters.page) params.append('page', this.filters.page);
         
         const url = `${this.apiBase}/api/course/?${params.toString()}`;
+        console.log('Fetching URL:', url);
         
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const data = await response.json();
-            this.displayCourses(data);
-            this.updateCoursesCount(data.length);
+            console.log('API Response:', data);
+            
+            // بررسی فرمت دیتا - تطبیق با فرمت‌های مختلف
+            let courses = [];
+            let count = 0;
+            
+            if (data.results) {
+                // فرمت صفحه‌بندی شده DRF
+                courses = data.results;
+                count = data.count;
+                this.totalPages = Math.ceil(count / 15);
+            } else if (Array.isArray(data)) {
+                // فرمت آرایه ساده
+                courses = data;
+                count = data.length;
+                this.totalPages = Math.ceil(count / 15);
+            } else {
+                // فرمت دیگه
+                courses = data;
+                count = data.length || Object.keys(data).length;
+                this.totalPages = 1;
+            }
+            
+            this.currentPage = this.filters.page;
+            this.totalCourses = count;
+            
+            this.displayCourses(courses);
+            this.updateCoursesCount(count);
+            this.renderPagination();
+            
         } catch (error) {
             console.error('Fetch error:', error);
             this.showError();
@@ -164,71 +205,73 @@ class CourseManager {
     }
     
     createCourseCard(course) {
-    const hasDiscount = course.discount_percent && course.discount_percent > 0;
-    const finalPrice = course.final_price || course.price;
-    const discountPercent = course.discount_percent || 0;
-    const savedAmount = hasDiscount ? course.price - finalPrice : 0;
-    
-    // ساخت آدرس تصویر دوره
-    const courseImage = course.image || course.cover || null;
-    const imageHtml = courseImage ? 
-        `<img src="${courseImage}" alt="${this.escapeHtml(course.title)}" class="course-img">` :
-        `<i class="fas fa-laptop-code"></i>`;
-    
-    return `
-        <div class="course-card" data-aos="fade-up">
-            <a href="/course/${course.slug}/" class="course-link">
-                <div class="course-image ${hasDiscount ? 'has-discount' : ''}">
-                    ${imageHtml}
-                    ${hasDiscount ? `
-                        
-                    ` : ''}
-                </div>
-                <div class="course-content">
-                    <h3 class="course-title">${this.escapeHtml(course.title)}</h3>
-                    <div class="instructor">
-                        <i class="fas fa-chalkboard-user"></i>
-                        <span>${this.escapeHtml(course.instructor_name || course.instructor_phone || 'سبزلرن')}</span>
-                    </div>
-                    <div class="course-meta">
-                        <span class="course-level">
-                            <i class="fas fa-signal"></i>
-                            ${course.level || 'مقدماتی تا پیشرفته'}
-                        </span>
-                        <span class="course-duration">
-                            <i class="fas fa-clock"></i>
-                            ${course.duration || 'نامشخص'}
-                        </span>
-                    </div>
-                    <div class="course-price">
+        const hasDiscount = course.discount_percent && course.discount_percent > 0;
+        const finalPrice = course.final_price || course.price;
+        const discountPercent = course.discount_percent || 0;
+        const savedAmount = hasDiscount ? course.price - finalPrice : 0;
+        
+        const courseImage = course.image || course.cover || null;
+        const imageHtml = courseImage ? 
+            `<img src="${courseImage}" alt="${this.escapeHtml(course.title)}" class="course-img">` :
+            `<i class="fas fa-laptop-code"></i>`;
+        
+        return `
+            <div class="course-card">
+                <a href="/course/${course.slug}/" class="course-link">
+                    <div class="course-image ${hasDiscount ? 'has-discount' : ''}">
+                        ${imageHtml}
                         ${hasDiscount ? `
-                            <div class="price-info">
-                                <span class="old-price">${this.formatPrice(course.price)} تومان</span>
-                                <span class="saved-amount">(صرفه‌جویی ${this.formatPrice(savedAmount)} تومان)</span>
+                            <div class="discount-badge">
+                                <span class="discount-percent">${discountPercent}%</span>
+                                <span class="discount-label">تخفیف ویژه</span>
                             </div>
-                            <div class="final-price">
-                                <span class="price">${this.formatPrice(finalPrice)} تومان</span>
-                                <i class="fas fa-arrow-left"></i>
-                            </div>
-                        ` : `
-                            <div class="final-price">
-                                <span class="price">${this.formatPrice(course.price)} تومان</span>
-                            </div>
-                        `}
+                        ` : ''}
                     </div>
-                    <div class="course-footer">
-                        <button class="preview-btn">مشاهده دوره</button>
-                        ${hasDiscount ? '<span class="limited-badge"><i class="fas fa-clock"></i> زمان محدود</span>' : ''}
+                    <div class="course-content">
+                        <h3 class="course-title">${this.escapeHtml(course.title)}</h3>
+                        <div class="instructor">
+                            <i class="fas fa-chalkboard-user"></i>
+                            <span>${this.escapeHtml(course.instructor_name || course.instructor_phone || 'سبزلرن')}</span>
+                        </div>
+                        <div class="course-meta">
+                            <span class="course-level">
+                                <i class="fas fa-signal"></i>
+                                ${course.level || 'مقدماتی تا پیشرفته'}
+                            </span>
+                            <span class="course-duration">
+                                <i class="fas fa-clock"></i>
+                                ${course.duration || 'نامشخص'}
+                            </span>
+                        </div>
+                        <div class="course-price">
+                            ${hasDiscount ? `
+                                <div class="price-info">
+                                    <span class="old-price">${this.formatPrice(course.price)} تومان</span>
+                                    <span class="saved-amount">(صرفه‌جویی ${this.formatPrice(savedAmount)} تومان)</span>
+                                </div>
+                                <div class="final-price">
+                                    <span class="price">${this.formatPrice(finalPrice)} تومان</span>
+                                    <i class="fas fa-arrow-left"></i>
+                                </div>
+                            ` : `
+                                <div class="final-price">
+                                    <span class="price">${this.formatPrice(course.price)} تومان</span>
+                                </div>
+                            `}
+                        </div>
+                        <div class="course-footer">
+                            <button class="preview-btn">مشاهده دوره</button>
+                            ${hasDiscount ? '<span class="limited-badge"><i class="fas fa-clock"></i> زمان محدود</span>' : ''}
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-    `;
+                </a>
+            </div>
+        `;
     }
     
     formatPrice(price) {
         if (!price && price !== 0) return '۰';
-        return new Intl.NumberFormat('fa-IR').format(price);
+        return price.toLocaleString('fa-IR');
     }
     
     escapeHtml(text) {
@@ -238,10 +281,92 @@ class CourseManager {
         return div.innerHTML;
     }
     
+    renderPagination() {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return;
+        
+        if (this.totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        let html = '<div class="pagination-wrapper">';
+        
+        // دکمه قبلی
+        html += `
+            <button class="pagination-btn ${this.currentPage === 1 ? 'disabled' : ''}" 
+                    onclick="courseManager.goToPage(${this.currentPage - 1})" 
+                    ${this.currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i> قبلی
+            </button>
+        `;
+        
+        // محاسبه محدوده نمایش صفحات
+        let startPage = Math.max(1, this.currentPage - 2);
+        let endPage = Math.min(this.totalPages, this.currentPage + 2);
+        
+        // صفحه اول
+        if (startPage > 1) {
+            html += `<button class="pagination-btn" onclick="courseManager.goToPage(1)">1</button>`;
+            if (startPage > 2) {
+                html += `<span class="pagination-dots">...</span>`;
+            }
+        }
+        
+        // صفحات میانی
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" 
+                        onclick="courseManager.goToPage(${i})">
+                    ${i}
+                </button>
+            `;
+        }
+        
+        // صفحه آخر
+        if (endPage < this.totalPages) {
+            if (endPage < this.totalPages - 1) {
+                html += `<span class="pagination-dots">...</span>`;
+            }
+            html += `<button class="pagination-btn" onclick="courseManager.goToPage(${this.totalPages})">${this.totalPages}</button>`;
+        }
+        
+        // دکمه بعدی
+        html += `
+            <button class="pagination-btn ${this.currentPage === this.totalPages ? 'disabled' : ''}" 
+                    onclick="courseManager.goToPage(${this.currentPage + 1})" 
+                    ${this.currentPage === this.totalPages ? 'disabled' : ''}>
+                بعدی <i class="fas fa-chevron-left"></i>
+            </button>
+        `;
+        
+        // نمایش وضعیت صفحه
+        html += `
+            <div class="pagination-info">
+                صفحه ${this.currentPage} از ${this.totalPages} | 
+                مجموع ${this.totalCourses} دوره
+            </div>
+        `;
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+        
+        this.filters.page = page;
+        this.fetchCourses();
+        
+        // اسکرول به بالای صفحه
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
     applyFilters() {
         this.filters.min_price = document.getElementById('minPrice').value || null;
         this.filters.max_price = document.getElementById('maxPrice').value || null;
         this.filters.ordering = document.getElementById('sortBy').value;
+        this.filters.page = 1;
         this.fetchCourses();
     }
     
@@ -257,7 +382,8 @@ class CourseManager {
             search: '',
             min_price: null,
             max_price: null,
-            ordering: '-created_at'
+            ordering: '-created_at',
+            page: 1
         };
         
         this.fetchCourses();
@@ -272,15 +398,23 @@ class CourseManager {
     }
     
     showLoading() {
-        document.getElementById('loading').classList.remove('hidden');
-        document.getElementById('coursesGrid').classList.add('hidden');
-        document.getElementById('error').classList.add('hidden');
-        document.getElementById('noResults').classList.add('hidden');
+        const loadingDiv = document.getElementById('loading');
+        const gridDiv = document.getElementById('coursesGrid');
+        const errorDiv = document.getElementById('error');
+        const noResultsDiv = document.getElementById('noResults');
+        
+        if (loadingDiv) loadingDiv.classList.remove('hidden');
+        if (gridDiv) gridDiv.classList.add('hidden');
+        if (errorDiv) errorDiv.classList.add('hidden');
+        if (noResultsDiv) noResultsDiv.classList.add('hidden');
     }
     
     showError() {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('error').classList.remove('hidden');
+        const loadingDiv = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        
+        if (loadingDiv) loadingDiv.classList.add('hidden');
+        if (errorDiv) errorDiv.classList.remove('hidden');
     }
     
     animateCards() {
@@ -310,5 +444,25 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ... بقیه کد ...
+
+// دکمه اسکرول به بالا
+const scrollTopBtn = document.createElement('button');
+scrollTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+scrollTopBtn.className = 'scroll-top-btn';
+document.body.appendChild(scrollTopBtn);
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+        scrollTopBtn.classList.add('show');
+    } else {
+        scrollTopBtn.classList.remove('show');
+    }
+});
+
+scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 </script>
 {% endblock %}
