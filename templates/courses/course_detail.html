@@ -1,0 +1,510 @@
+<!-- templates/courses/course_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course_title }} | سبزلرن{% endblock %}
+
+{% block extra_css %}
+<style>
+.course-detail-container {
+    max-width: 1280px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+}
+
+.course-main {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.course-header {
+    padding: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.course-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.course-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.course-image-main {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    color: white;
+}
+
+.course-description {
+    padding: 2rem;
+}
+
+.course-description h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.course-description p {
+    color: #475569;
+    line-height: 1.8;
+}
+
+.sections-container {
+    padding: 0 2rem 2rem;
+}
+
+.section-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.section-header {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.section-header:hover {
+    background: #f1f5f9;
+}
+
+.section-title {
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-duration {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.video-list {
+    display: none;
+    border-top: 1px solid #e2e8f0;
+}
+
+.section-card.open .video-list {
+    display: block;
+}
+
+.video-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.video-item:hover {
+    background: #f8fafc;
+}
+
+.video-item.free {
+    background: #fefce8;
+}
+
+.video-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.video-icon {
+    width: 32px;
+    color: var(--primary-color);
+}
+
+.video-title {
+    color: #1e293b;
+}
+
+.video-free-badge {
+    background: #10b981;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    margin-right: 0.5rem;
+}
+
+.video-duration {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.watch-btn {
+    background: var(--btn-gradient);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.watch-btn:hover {
+    background: var(--btn-hover);
+    transform: scale(1.02);
+}
+
+.watch-btn.disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.course-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.price-card {
+    background: white;
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+
+.price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--price-color);
+    margin-bottom: 0.5rem;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #94a3b8;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.enroll-btn {
+    width: 100%;
+    background: var(--btn-gradient);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1rem;
+}
+
+.enroll-btn:hover {
+    background: var(--btn-hover);
+    transform: translateY(-2px);
+}
+
+.enroll-btn.already {
+    background: #10b981;
+}
+
+.instructor-card {
+    background: white;
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.instructor-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.instructor-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.instructor-bio {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.loading-state, .error-state {
+    text-align: center;
+    padding: 4rem;
+}
+
+@media (max-width: 768px) {
+    .course-detail-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .course-sidebar {
+        position: static;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="courseDetail" class="course-detail-container">
+    <div id="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>در حال بارگذاری دوره...</p>
+    </div>
+</div>
+
+<script>
+const API_BASE_URL = 'http://127.0.0.1:8000';
+const courseSlug = '{{ course_slug }}';
+let token = localStorage.getItem('auth_token');
+
+async function loadCourseDetail() {
+    const container = document.getElementById('courseDetail');
+    
+    try {
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Token ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/api/course/${courseSlug}/`, {
+            headers: headers
+        });
+        
+        if (!response.ok) throw new Error('Network error');
+        
+        const course = await response.json();
+        displayCourseDetail(course);
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = `
+            <div class="error-state">
+                <h3>❌ خطا در دریافت اطلاعات دوره</h3>
+                <button class="btn btn-primary" onclick="loadCourseDetail()">تلاش مجدد</button>
+            </div>
+        `;
+    }
+}
+
+function displayCourseDetail(course) {
+    const container = document.getElementById('courseDetail');
+    const hasDiscount = course.discount_percent > 0;
+    const finalPrice = course.final_price;
+    const isEnrolled = course.is_enrolled;
+    
+    // گرفتن نام مدرس از instructor profile
+    let instructorName = 'مدرس';
+    let instructorBio = 'مدرس حرفه‌ای برنامه‌نویسی';
+    
+    if (course.instructor) {
+        if (course.instructor.first_name && course.instructor.last_name) {
+            instructorName = `${course.instructor.first_name} ${course.instructor.last_name}`;
+        } else if (course.instructor.name) {
+            instructorName = course.instructor.name;
+        } else if (course.instructor.user) {
+            instructorName = course.instructor.user.phone || 'مدرس';
+        }
+        
+        if (course.instructor.bio) {
+            instructorBio = course.instructor.bio;
+        }
+    }
+    
+    container.innerHTML = `
+        <div class="course-main">
+            <div class="course-image-main">
+                📚
+            </div>
+            <div class="course-header">
+                <h1>${escapeHtml(course.title)}</h1>
+                <div class="course-meta">
+                    <div class="meta-item">⏱️ ${formatDuration(course.total_duration)}</div>
+                    <div class="meta-item">📊 ${course.progress_percent || 0}% پیشرفت</div>
+                    <div class="meta-item">📅 ${new Date(course.created_at).toLocaleDateString('fa-IR')}</div>
+                </div>
+            </div>
+            <div class="course-description">
+                <h3>توضیحات دوره</h3>
+                <p>${escapeHtml(course.description)}</p>
+            </div>
+            <div class="sections-container">
+                <h3 style="margin-bottom: 1rem;">سرفصل‌های دوره</h3>
+                ${course.sections && course.sections.length > 0 ? course.sections.map(section => `
+                    <div class="section-card" onclick="toggleSection(this)">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <span>📖</span>
+                                ${escapeHtml(section.title)}
+                            </div>
+                            <div class="section-duration">
+                                ${formatDuration(section.total_duration)}
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                        </div>
+                        <div class="video-list">
+                            ${section.videos && section.videos.length > 0 ? section.videos.map(video => `
+                                <div class="video-item ${video.is_free ? 'free' : ''}" onclick="event.stopPropagation()">
+                                    <div class="video-info">
+                                        <div class="video-icon">▶️</div>
+                                        <div class="video-title">
+                                            ${escapeHtml(video.title)}
+                                            ${video.is_free ? '<span class="video-free-badge">رایگان</span>' : ''}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div class="video-duration">${video.duration_minutes || '0:00'}</div>
+                                        <button class="watch-btn ${!isEnrolled && !video.is_free ? 'disabled' : ''}" 
+                                                onclick="watchVideo(${video.id}, ${video.is_free})">
+                                            ${isEnrolled || video.is_free ? 'تماشا' : 'خرید دوره'}
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="video-item">هیچ ویدیویی در این بخش وجود ندارد</div>'}
+                        </div>
+                    </div>
+                `).join('') : '<div style="padding: 2rem; text-align: center;">هنوز سرفصلی برای این دوره ثبت نشده است</div>'}
+            </div>
+        </div>
+        <div class="course-sidebar">
+            <div class="price-card">
+                <div class="price">
+                    ${hasDiscount ? `<span class="old-price">${formatPrice(course.price)}</span>` : ''}
+                    ${formatPrice(finalPrice)} تومان
+                </div>
+                ${hasDiscount ? `<div style="color: #10b981; font-size: 0.8rem;">🔥 ${course.discount_percent}% تخفیف</div>` : ''}
+                <button class="enroll-btn ${isEnrolled ? 'already' : ''}" onclick="handleEnrollment(${course.id}, ${isEnrolled})">
+                    ${isEnrolled ? '✅ ثبت نام شده‌اید' : '✨ ثبت نام در دوره'}
+                </button>
+            </div>
+            <div class="instructor-card">
+                <div class="instructor-avatar">👨‍🏫</div>
+                <div class="instructor-name">${escapeHtml(instructorName)}</div>
+                <div class="instructor-bio">${escapeHtml(instructorBio)}</div>
+            </div>
+        </div>
+    `;
+}
+
+function toggleSection(element) {
+    element.classList.toggle('open');
+}
+
+async function handleEnrollment(courseId, isEnrolled) {
+    if (isEnrolled) {
+        alert('شما قبلاً در این دوره ثبت نام کرده‌اید!');
+        return;
+    }
+    
+    // بررسی مجدد token
+    token = localStorage.getItem('auth_token');
+    
+    if (!token) {
+        if (confirm('برای ثبت نام ابتدا باید وارد شوید. آیا به صفحه ورود بروید؟')) {
+            window.location.href = '/account/login/';
+        }
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/course/enroll/${courseId}/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            alert('✅ ثبت نام با موفقیت انجام شد!');
+            location.reload();
+        } else {
+            const data = await response.json();
+            alert('❌ خطا: ' + (data.detail || 'مشکلی پیش آمده است'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ خطا در ارتباط با سرور');
+    }
+}
+
+function watchVideo(videoId, isFree) {
+    // بررسی مجدد token
+    const currentToken = localStorage.getItem('auth_token');
+    
+    if (!currentToken && !isFree) {
+        if (confirm('برای تماشای این ویدیو باید وارد شوید. آیا به صفحه ورود بروید؟')) {
+            window.location.href = '/account/login/';
+        }
+        return;
+    }
+    
+    window.location.href = `/video/${courseSlug}/${videoId}/`;
+}
+
+function formatDuration(seconds) {
+    if (!seconds || seconds === 0) return '0 دقیقه';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours} ساعت ${minutes} دقیقه`;
+    return `${minutes} دقیقه`;
+}
+
+function formatPrice(price) {
+    if (!price && price !== 0) return '۰';
+    return price.toLocaleString('fa-IR');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// بارگذاری اولیه
+loadCourseDetail();
+</script>
+{% endblock %}

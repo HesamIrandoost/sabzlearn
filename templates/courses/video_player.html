@@ -1,0 +1,394 @@
+<!-- templates/courses/video_player.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تماشای ویدیو | سبزلرن{% endblock %}
+
+{% block extra_css %}
+<style>
+/* استفاده از متغیرهای تم */
+.video-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.video-player-wrapper {
+    background: #0f172a;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.video-player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.video-info {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.video-title-large {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.course-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.playlist-sidebar {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    margin-top: 2rem;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 12px;
+}
+
+.playlist-item:hover {
+    background: #f8fafc;
+}
+
+.playlist-item.active {
+    background: rgba(var(--primary-color-rgb), 0.1);
+    border-right: 3px solid var(--primary-color);
+}
+
+.playlist-item.watched {
+    opacity: 0.7;
+}
+
+.playlist-status {
+    width: 24px;
+    text-align: center;
+}
+
+.progress-bar-container {
+    background: #e2e8f0;
+    border-radius: 10px;
+    height: 4px;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.progress-bar {
+    background: var(--primary-color);
+    border-radius: 10px;
+    height: 100%;
+    width: 0%;
+    position: relative;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-btn {
+    background: var(--btn-gradient);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: var(--btn-hover);
+    transform: translateY(-2px);
+}
+
+.nav-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .video-title-large {
+        font-size: 1.2rem;
+    }
+    
+    .nav-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- محتوای ویدیو پلیر به همین صورت باقی می‌ماند -->
+<div class="video-container">
+    <div id="loading" class="loading-state" style="text-align: center; padding: 4rem;">
+        <div class="loading-spinner"></div>
+        <p>در حال بارگذاری ویدیو...</p>
+    </div>
+    
+    <div id="videoContent" style="display: none;">
+        <div class="video-player-wrapper">
+            <video id="videoPlayer" class="video-player" controls controlsList="nodownload">
+                <source id="videoSource" src="" type="video/mp4">
+                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+            </video>
+        </div>
+        
+        <div class="video-info">
+            <a href="#" id="courseLink" class="course-link">← بازگشت به دوره</a>
+            <h1 id="videoTitle" class="video-title-large"></h1>
+            <div class="progress-bar-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="playlist-sidebar">
+            <h3 style="margin-bottom: 1rem;">لیست پخش</h3>
+            <div id="playlist"></div>
+            
+            <div class="controls">
+                <button id="prevBtn" class="nav-btn" disabled>‹ قبلی</button>
+                <button id="nextBtn" class="nav-btn" disabled>بعدی ›</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// اسکریپت ویدیو پلیر به همان صورت قبل
+const API_BASE_URL = 'http://127.0.0.1:8000';
+const courseSlug = '{{ course_slug }}';
+const videoId = parseInt('{{ video_id }}');
+let token = localStorage.getItem('auth_token');
+
+let courseData = null;
+let currentVideoIndex = 0;
+let allVideos = [];
+let saveTimeout = null;
+
+async function loadVideoData() {
+    try {
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Token ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/api/course/${courseSlug}/`, {
+            headers: headers
+        });
+        
+        if (!response.ok) throw new Error('Network error');
+        
+        courseData = await response.json();
+        
+        allVideos = [];
+        if (courseData.sections) {
+            courseData.sections.forEach(section => {
+                if (section.videos) {
+                    section.videos.forEach(video => {
+                        allVideos.push({
+                            ...video,
+                            sectionTitle: section.title
+                        });
+                    });
+                }
+            });
+        }
+        
+        currentVideoIndex = allVideos.findIndex(v => v.id === videoId);
+        
+        if (currentVideoIndex === -1 && allVideos.length > 0) {
+            currentVideoIndex = 0;
+        }
+        
+        if (allVideos.length > 0) {
+            displayVideo(currentVideoIndex);
+            loadPlaylist();
+            setupNavigation();
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('videoContent').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('loading').innerHTML = `
+            <div class="error-state">
+                <h3>❌ خطا در بارگذاری ویدیو</h3>
+                <button class="btn btn-primary" onclick="loadVideoData()">تلاش مجدد</button>
+            </div>
+        `;
+    }
+}
+
+function displayVideo(index) {
+    const video = allVideos[index];
+    if (!video) return;
+    
+    const videoElement = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+    const videoTitle = document.getElementById('videoTitle');
+    const courseLink = document.getElementById('courseLink');
+    
+    videoSource.src = `${API_BASE_URL}${video.video_file}`;
+    videoElement.load();
+    videoTitle.textContent = video.title;
+    courseLink.href = `/course/${courseSlug}/`;
+    
+    const savedPosition = localStorage.getItem(`video_${courseSlug}_${video.id}_position`);
+    if (savedPosition) {
+        videoElement.currentTime = parseFloat(savedPosition);
+    }
+    
+    videoElement.removeEventListener('timeupdate', saveProgress);
+    videoElement.addEventListener('timeupdate', saveProgress);
+    
+    videoElement.addEventListener('ended', () => {
+        markVideoAsWatched(video.id);
+    });
+    
+    updateNavButtons();
+}
+
+function saveProgress() {
+    const video = document.getElementById('videoPlayer');
+    if (saveTimeout) clearTimeout(saveTimeout);
+    
+    saveTimeout = setTimeout(() => {
+        const position = video.currentTime;
+        const videoItem = allVideos[currentVideoIndex];
+        if (videoItem) {
+            localStorage.setItem(`video_${courseSlug}_${videoItem.id}_position`, position);
+        }
+    }, 3000);
+}
+
+async function markVideoAsWatched(videoId) {
+    if (!token) return;
+    
+    try {
+        await fetch(`${API_BASE_URL}/api/course/video-progress/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                video_id: videoId,
+                is_watched: true
+            })
+        });
+    } catch (error) {
+        console.error('Mark watched error:', error);
+    }
+}
+
+function loadPlaylist() {
+    const playlistDiv = document.getElementById('playlist');
+    
+    if (!playlistDiv || allVideos.length === 0) return;
+    
+    playlistDiv.innerHTML = allVideos.map((video, index) => {
+        const isActive = index === currentVideoIndex;
+        const isWatched = localStorage.getItem(`video_${courseSlug}_${video.id}_watched`) === 'true';
+        const isEnrolled = courseData?.is_enrolled;
+        
+        return `
+            <div class="playlist-item ${isActive ? 'active' : ''} ${isWatched ? 'watched' : ''}" onclick="goToVideo(${index})">
+                <div class="playlist-status">
+                    ${isWatched ? '✅' : (video.is_free ? '🔓' : '🔒')}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">${escapeHtml(video.title)}</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">${video.sectionTitle || 'بخش اصلی'} • ${video.duration_minutes || '0:00'}</div>
+                </div>
+                ${video.is_free ? '<span style="font-size: 0.7rem; color: #10b981;">رایگان</span>' : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function goToVideo(index) {
+    const video = allVideos[index];
+    const isEnrolled = courseData?.is_enrolled;
+    
+    if (!isEnrolled && !video.is_free) {
+        if (confirm('برای تماشای این ویدیو باید دوره را خریداری کنید. آیا به صفحه دوره بروید؟')) {
+            window.location.href = `/course/${courseSlug}/`;
+        }
+        return;
+    }
+    
+    currentVideoIndex = index;
+    displayVideo(currentVideoIndex);
+    loadPlaylist();
+}
+
+function setupNavigation() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) {
+        prevBtn.onclick = () => {
+            if (currentVideoIndex > 0) {
+                goToVideo(currentVideoIndex - 1);
+            }
+        };
+    }
+    
+    if (nextBtn) {
+        nextBtn.onclick = () => {
+            if (currentVideoIndex < allVideos.length - 1) {
+                goToVideo(currentVideoIndex + 1);
+            }
+        };
+    }
+}
+
+function updateNavButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) prevBtn.disabled = currentVideoIndex === 0;
+    if (nextBtn) nextBtn.disabled = currentVideoIndex === allVideos.length - 1;
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+loadVideoData();
+</script>
+{% endblock %}

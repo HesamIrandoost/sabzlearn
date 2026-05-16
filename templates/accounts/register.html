@@ -1,0 +1,217 @@
+<!-- templates/accounts/register.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ثبت نام | سبزلرن{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>ثبت نام در سبزلرن</h2>
+            <p>همین حالا مسیر یادگیری خود را شروع کنید</p>
+        </div>
+        
+        <form id="registerForm" class="auth-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>شماره موبایل</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="09XXXXXXXXX" required>
+                <small class="error-message" id="phoneError"></small>
+            </div>
+            
+            <div class="form-group">
+                <label>ایمیل (اختیاری)</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="example@email.com">
+                <small class="error-message" id="emailError"></small>
+            </div>
+            
+            <div class="form-group">
+                <label>رمز عبور</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="********" required>
+                <small class="error-message" id="passwordError"></small>
+            </div>
+            
+            <div class="form-group">
+                <label>تکرار رمز عبور</label>
+                <input type="password" id="password_confirm" name="password_confirm" class="form-control" placeholder="********" required>
+                <small class="error-message" id="passwordConfirmError"></small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block" id="registerBtn">
+                ثبت نام
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>قبلاً ثبت نام کرده‌اید؟ <a href="/account/login/">ورود به حساب</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+/* همان استایل‌های login.html */
+.auth-container {
+    min-height: calc(100vh - 300px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h2 {
+    color: #1e293b;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.auth-footer a {
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 500;
+}
+</style>
+
+<script>
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const password_confirm = document.getElementById('password_confirm').value;
+    
+    // clear errors
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    
+    const registerBtn = document.getElementById('registerBtn');
+    registerBtn.disabled = true;
+    registerBtn.textContent = 'در حال ثبت نام...';
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/account/register/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone, email, password, password_confirm })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showMessage('ثبت نام موفقیت آمیز! به صفحه ورود هدایت می‌شوید...', 'success');
+            
+            setTimeout(() => {
+                window.location.href = '/account/login/';
+            }, 2000);
+        } else {
+            // نمایش خطاها
+            if (data.phone) {
+                document.getElementById('phoneError').textContent = data.phone[0];
+            }
+            if (data.email) {
+                document.getElementById('emailError').textContent = data.email[0];
+            }
+            if (data.password) {
+                document.getElementById('passwordError').textContent = data.password[0];
+            }
+            if (data.non_field_errors) {
+                showMessage(data.non_field_errors[0], 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('خطا در ارتباط با سرور', 'error');
+    } finally {
+        registerBtn.disabled = false;
+        registerBtn.textContent = 'ثبت نام';
+    }
+});
+
+function showMessage(message, type) {
+    const existingMsg = document.querySelector('.success-message, .error-message-global');
+    if (existingMsg) existingMsg.remove();
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.textContent = message;
+    msgDiv.style.cssText = `
+        background: ${type === 'success' ? '#10b981' : '#dc2626'};
+        color: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+    `;
+    
+    const form = document.getElementById('registerForm');
+    form.insertBefore(msgDiv, form.firstChild);
+    
+    setTimeout(() => {
+        msgDiv.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

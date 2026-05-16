@@ -1,0 +1,214 @@
+<!-- templates/courses/course_list.html - نسخه دیباگ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لیست دوره‌های آموزشی | سبزلرن{% endblock %}
+
+{% block content %}
+<div class="filters">
+    <div class="filter-grid">
+        <div class="filter-group">
+            <label>💰 حداقل قیمت (تومان)</label>
+            <input type="number" id="minPrice" placeholder="از ۰">
+        </div>
+        <div class="filter-group">
+            <label>💰 حداکثر قیمت (تومان)</label>
+            <input type="number" id="maxPrice" placeholder="تا هر قیمت">
+        </div>
+        <div class="filter-group">
+            <label>📊 مرتب‌سازی</label>
+            <select id="sortBy">
+                <option value="-created_at">جدیدترین</option>
+                <option value="price">ارزان‌ترین</option>
+                <option value="-price">گران‌ترین</option>
+            </select>
+        </div>
+    </div>
+    <div style="margin-top: 1.2rem; display: flex; gap: 0.8rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" id="resetBtn">ریست فیلترها</button>
+        <button class="btn btn-primary" id="applyBtn">اعمال فیلتر</button>
+    </div>
+</div>
+
+<div class="courses-container">
+    <h2 class="section-title">🔥 <span>آخرین دوره‌های سبزلرن</span></h2>
+    
+    <div id="loading" class="loading">
+        <div style="font-size: 1.2rem;">⏳ در حال بارگذاری دوره‌ها...</div>
+    </div>
+    
+    <div id="error" class="error hidden">
+        <div style="color: #dc2626; margin-bottom: 1rem;">❌ خطا در دریافت اطلاعات از سرور</div>
+        <button class="btn btn-primary" onclick="fetchCourses()">تلاش مجدد</button>
+    </div>
+    
+    <div id="coursesGrid" class="courses-grid"></div>
+    
+    <div id="noResults" class="no-results hidden">
+        <div style="font-size: 1.1rem; color: #64748b;">🔍 هیچ دوره‌ای با این شرایط پیدا نشد!</div>
+    </div>
+</div>
+
+<div id="debugInfo" style="background: #f1f5f9; padding: 1rem; margin: 1rem; border-radius: 8px; font-size: 12px; direction: ltr;">
+    <strong>Debug Info:</strong>
+    <div id="debugContent"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const API_BASE_URL = 'http://127.0.0.1:8000';
+let filters = {
+    search: '',
+    min_price: null,
+    max_price: null,
+    ordering: '-created_at'
+};
+
+async function fetchCourses() {
+    const loadingDiv = document.getElementById('loading');
+    const gridDiv = document.getElementById('coursesGrid');
+    const errorDiv = document.getElementById('error');
+    const noResultsDiv = document.getElementById('noResults');
+    const debugDiv = document.getElementById('debugContent');
+    
+    loadingDiv.classList.remove('hidden');
+    gridDiv.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+    noResultsDiv.classList.add('hidden');
+    
+    const params = new URLSearchParams();
+    if (filters.search) params.append('search', filters.search);
+    if (filters.min_price) params.append('min_price', filters.min_price);
+    if (filters.max_price) params.append('max_price', filters.max_price);
+    if (filters.ordering) params.append('ordering', filters.ordering);
+    
+    const url = `${API_BASE_URL}/api/course/?${params.toString()}`;
+    
+    debugDiv.innerHTML = `📡 در حال درخواست به: ${url}<br>`;
+    
+    try {
+        const response = await fetch(url);
+        debugDiv.innerHTML += `✅ Response status: ${response.status} ${response.statusText}<br>`;
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        debugDiv.innerHTML += `📊 تعداد دوره‌ها: ${data.length || 0}<br>`;
+        debugDiv.innerHTML += `📄 نمونه دیتا: ${JSON.stringify(data[0] || 'هیچ دیتایی نیست').substring(0, 200)}<br>`;
+        
+        displayCourses(data);
+    } catch (error) {
+        console.error('Fetch error:', error);
+        debugDiv.innerHTML += `❌ خطا: ${error.message}<br>`;
+        debugDiv.innerHTML += `💡 اطمینان حاصل کنید سرور روی پورت 8000 اجرا شده باشد.<br>`;
+        loadingDiv.classList.add('hidden');
+        errorDiv.classList.remove('hidden');
+    }
+}
+
+function displayCourses(courses) {
+    const loadingDiv = document.getElementById('loading');
+    const gridDiv = document.getElementById('coursesGrid');
+    const noResultsDiv = document.getElementById('noResults');
+    
+    loadingDiv.classList.add('hidden');
+    
+    if (!courses || courses.length === 0) {
+        gridDiv.classList.add('hidden');
+        noResultsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    gridDiv.classList.remove('hidden');
+    noResultsDiv.classList.add('hidden');
+    
+    gridDiv.innerHTML = courses.map(course => {
+        const hasDiscount = course.discount_percent && course.discount_percent > 0;
+        const finalPrice = course.final_price || course.price;
+        const courseDetailUrl = `/course/${course.slug}/`;
+        
+        return `
+            <div class="course-card">
+                <a href="${courseDetailUrl}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="course-image">
+                        📘
+                        ${hasDiscount ? `<span class="discount-badge">🔥 ${course.discount_percent}٪ تخفیف</span>` : ''}
+                    </div>
+                    <div class="course-content">
+                        <div class="course-title">${escapeHtml(course.title)}</div>
+                        <div class="instructor">
+                            👨‍🏫 مدرس: ${escapeHtml(course.instructor_name || course.instructor_phone || 'سبزلرن')}
+                        </div>
+                        <div class="course-price">
+                            <div>
+                                ${hasDiscount ? `<span class="old-price">${formatPrice(course.price)} تومان</span>` : ''}
+                                <span class="price">${formatPrice(finalPrice)} تومان</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        `;
+    }).join('');
+}
+
+function formatPrice(price) {
+    if (!price && price !== 0) return '۰';
+    return price.toLocaleString('fa-IR');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function applyFilters() {
+    filters.search = document.getElementById('searchInput')?.value || '';
+    filters.min_price = document.getElementById('minPrice').value || null;
+    filters.max_price = document.getElementById('maxPrice').value || null;
+    filters.ordering = document.getElementById('sortBy').value;
+    fetchCourses();
+}
+
+function resetFilters() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    document.getElementById('sortBy').value = '-created_at';
+    filters = {
+        search: '',
+        min_price: null,
+        max_price: null,
+        ordering: '-created_at'
+    };
+    fetchCourses();
+}
+
+// اطمینان از وجود المنت‌ها
+if (document.getElementById('applyBtn')) {
+    document.getElementById('applyBtn').addEventListener('click', applyFilters);
+}
+if (document.getElementById('resetBtn')) {
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+}
+
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filters.search = e.target.value;
+            fetchCourses();
+        }, 500);
+    });
+}
+
+// اجرای اولیه
+fetchCourses();
+</script>
+{% endblock %}

@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/course/', include('courses.api.urls')),
 
     path('', include('courses.urls')),
+    path('account/', include('accounts.urls')),
 
 
     path('api-auth/', include('rest_framework.urls')),  # برای تست در براوزر

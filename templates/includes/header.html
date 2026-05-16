@@ -1,0 +1,135 @@
+<!-- templates/includes/header.html -->
+{% load static %}
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <span class="logo-text">سبزلرن</span>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="جستجوی دوره‌ها...">
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/">صفحه اصلی</a>
+            <a href="#">دوره‌ها</a>
+            <a href="#">مقالات</a>
+            <a href="#">تماس با ما</a>
+            <button id="gradientSwitchBtn" class="gradient-switch-header" title="تغییر تم">
+                🎨
+            </button>
+            <!-- لینک‌های داینامیک احراز هویت اینجا قرار می‌گیرند -->
+            <div id="authLinks" style="display: inline-flex; gap: 1rem; margin-right: 0.5rem;"></div>
+        </div>
+    </div>
+</nav>
+
+<section class="hero" id="heroSection">
+    <h1>برنامه‌نویسی رو شروع کن!</h1>
+    <p>مسیر شغلی‌ات رو با دوره‌های تخصصی ما بساز</p>
+    <div class="stats">
+        <div class="stat-box">📚 80+ موضوع مختلف</div>
+        <div class="stat-box">💼 آموزش ویژه بازار کار</div>
+        <div class="stat-box">🤖 مجهز به هوش مصنوعی</div>
+    </div>
+</section>
+
+<script>
+// ========== تم‌ها (دست نخورده) ==========
+const themes = [
+    { name: 'night', className: 'theme-night', heroClass: 'night', title: 'تم شب' },
+    { name: 'coffee', className: 'theme-coffee', heroClass: 'coffee', title: 'تم قهوه' },
+    { name: 'emerald', className: 'theme-emerald', heroClass: 'emerald', title: 'تم زمرد' }
+];
+
+let currentTheme = localStorage.getItem('siteTheme') || 'night';
+
+function changeTheme() {
+    const body = document.body;
+    const hero = document.getElementById('heroSection');
+    
+    let currentIndex = themes.findIndex(t => t.name === currentTheme);
+    let nextIndex = (currentIndex + 1) % themes.length;
+    let nextTheme = themes[nextIndex];
+    
+    body.classList.remove('theme-night', 'theme-coffee', 'theme-emerald');
+    hero.classList.remove('night', 'coffee', 'emerald');
+    
+    body.classList.add(nextTheme.className);
+    hero.classList.add(nextTheme.heroClass);
+    
+    currentTheme = nextTheme.name;
+    localStorage.setItem('siteTheme', currentTheme);
+    
+    const btn = document.getElementById('gradientSwitchBtn');
+    if (btn) {
+        btn.title = `تغییر به ${nextTheme.title}`;
+    }
+}
+
+// تنظیم تم ذخیره شده
+function initTheme() {
+    const body = document.body;
+    const hero = document.getElementById('heroSection');
+    const savedTheme = localStorage.getItem('siteTheme') || 'night';
+    const theme = themes.find(t => t.name === savedTheme) || themes[0];
+    
+    body.classList.add(theme.className);
+    hero.classList.add(theme.heroClass);
+    currentTheme = theme.name;
+    
+    const btn = document.getElementById('gradientSwitchBtn');
+    if (btn) {
+        btn.addEventListener('click', changeTheme);
+    }
+}
+
+// ========== احراز هویت (Authentication) ==========
+function updateAuthLinks() {
+    const token = localStorage.getItem('auth_token');
+    const authLinksDiv = document.getElementById('authLinks');
+    
+    if (!authLinksDiv) return;
+    
+    if (token) {
+        // کاربر لاگین کرده - نمایش پروفایل و خروج
+        authLinksDiv.innerHTML = `
+            <a href="/account/profile/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">پروفایل</a>
+            <a href="#" id="logoutNavBtn" style="color: #dc2626; text-decoration: none; font-weight: 500; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">خروج</a>
+        `;
+        
+        // اضافه کردن رویداد خروج
+        const logoutBtn = document.getElementById('logoutNavBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await fetch('http://127.0.0.1:8000/api/account/logout/', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Token ${token}`
+                        }
+                    });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                } finally {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user_phone');
+                    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                    window.location.href = '/';
+                }
+            });
+        }
+    } else {
+        // کاربر لاگین نکرده - نمایش ورود و ثبت نام
+        authLinksDiv.innerHTML = `
+            <a href="/account/login/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">ورود</a>
+            <a href="/account/register/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">ثبت نام</a>
+        `;
+    }
+}
+
+// ========== اجرای اولیه ==========
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();        // راه‌اندازی تم
+    updateAuthLinks();  // راه‌اندازی لینک‌های احراز هویت
+});
+</script>

@@ -1,0 +1,470 @@
+<!-- templates/accounts/profile.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}پروفایل کاربری | سبزلرن{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-sidebar">
+        <div class="profile-avatar">
+            <div class="avatar-placeholder" id="avatarPlaceholder">
+                👤
+            </div>
+            <h3 id="userPhone">-</h3>
+            <span class="role-badge" id="userRole">-</span>
+        </div>
+        
+        <div class="profile-menu">
+            <a href="#" class="menu-item active" data-tab="info">
+                <span>📊</span> اطلاعات شخصی
+            </a>
+            <a href="#" class="menu-item" data-tab="courses">
+                <span>📚</span> دوره‌های من
+            </a>
+            <a href="#" class="menu-item" data-tab="password">
+                <span>🔒</span> تغییر رمز
+            </a>
+            <button id="logoutBtn" class="menu-item logout">
+                <span>🚪</span> خروج
+            </button>
+        </div>
+    </div>
+    
+    <div class="profile-content">
+        <!-- Tab: اطلاعات شخصی -->
+        <div id="tabInfo" class="tab-content active">
+            <div class="info-card">
+                <h3>اطلاعات حساب کاربری</h3>
+                <div class="info-row">
+                    <span class="info-label">شماره موبایل:</span>
+                    <span class="info-value" id="profilePhone">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ایمیل:</span>
+                    <span class="info-value" id="profileEmail">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">نقش:</span>
+                    <span class="info-value" id="profileRole">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">تاریخ عضویت:</span>
+                    <span class="info-value" id="profileJoined">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: دوره‌های من -->
+        <div id="tabCourses" class="tab-content">
+            <div class="courses-card">
+                <h3>دوره‌های ثبت نامی من</h3>
+                <div id="enrolledCourses" class="enrolled-courses">
+                    <div class="loading-state">در حال بارگذاری...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: تغییر رمز -->
+        <div id="tabPassword" class="tab-content">
+            <div class="password-card">
+                <h3>تغییر رمز عبور</h3>
+                <div id="passwordMessage"></div>
+                
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label>رمز عبور فعلی</label>
+                        <input type="password" id="oldPassword" class="form-control" required>
+                        <small class="error-message" id="oldPasswordError"></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>رمز عبور جدید</label>
+                        <input type="password" id="newPassword" class="form-control" required>
+                        <small class="error-message" id="newPasswordError"></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>تکرار رمز عبور جدید</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                        <small class="error-message" id="confirmPasswordError"></small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">تغییر رمز</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+}
+
+.profile-sidebar {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.profile-avatar {
+    text-align: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 3rem;
+    color: white;
+}
+
+.profile-avatar h3 {
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.role-badge {
+    background: #e0e7ff;
+    color: #7c3aed;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.profile-menu {
+    margin-top: 1.5rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.menu-item:hover {
+    background: #f1f5f9;
+    color: #7c3aed;
+}
+
+.menu-item.active {
+    background: #7c3aed;
+    color: white;
+}
+
+.menu-item.logout {
+    color: #dc2626;
+    margin-top: 1rem;
+}
+
+.menu-item.logout:hover {
+    background: #fee2e2;
+}
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.info-card, .courses-card, .password-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.info-card h3, .courses-card h3, .password-card h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.info-row {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-label {
+    width: 150px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.info-value {
+    color: #1e293b;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #7c3aed;
+}
+
+.enrolled-course-item {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.enrolled-course-title {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.enrolled-course-progress {
+    color: #7c3aed;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-sidebar {
+        position: static;
+    }
+}
+</style>
+
+<script>
+const API_BASE_URL = 'http://127.0.0.1:8000';
+let token = localStorage.getItem('auth_token');
+
+if (!token) {
+    window.location.href = '/account/login/';
+}
+
+// Tab switching
+document.querySelectorAll('.menu-item[data-tab]').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tab = item.dataset.tab;
+        
+        // Update active class
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Show tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        if (tab === 'info') document.getElementById('tabInfo').classList.add('active');
+        if (tab === 'courses') document.getElementById('tabCourses').classList.add('active');
+        if (tab === 'password') document.getElementById('tabPassword').classList.add('active');
+    });
+});
+
+// Load profile info
+async function loadProfile() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/account/profile/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            displayProfile(data.data);
+        } else if (response.status === 401) {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/account/login/';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function displayProfile(profile) {
+    const user = profile.user;
+    
+    document.getElementById('userPhone').textContent = user.phone;
+    document.getElementById('userRole').textContent = user.role === 'student' ? 'دانشجو' : 'مدرس';
+    document.getElementById('profilePhone').textContent = user.phone;
+    document.getElementById('profileEmail').textContent = user.email || 'ثبت نشده';
+    document.getElementById('profileRole').textContent = user.role === 'student' ? 'دانشجو' : 'مدرس';
+    document.getElementById('profileJoined').textContent = new Date(user.date_joined).toLocaleDateString('fa-IR');
+    
+    // Set avatar placeholder
+    const avatar = document.getElementById('avatarPlaceholder');
+    avatar.textContent = user.phone.slice(-2);
+}
+
+// Load enrolled courses
+async function loadEnrolledCourses() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/course/my-courses/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const courses = await response.json();
+            displayEnrolledCourses(courses);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('enrolledCourses').innerHTML = '<div class="loading-state">خطا در بارگذاری دوره‌ها</div>';
+    }
+}
+
+function displayEnrolledCourses(courses) {
+    const container = document.getElementById('enrolledCourses');
+    
+    if (!courses || courses.length === 0) {
+        container.innerHTML = '<div class="loading-state">شما هنوز در هیچ دوره‌ای ثبت نام نکرده‌اید</div>';
+        return;
+    }
+    
+    container.innerHTML = courses.map(course => `
+        <div class="enrolled-course-item">
+            <div>
+                <div class="enrolled-course-title">${escapeHtml(course.course_title)}</div>
+                <div style="font-size: 0.8rem; color: #64748b;">تاریخ ثبت نام: ${new Date(course.enrolled_at).toLocaleDateString('fa-IR')}</div>
+            </div>
+            <div class="enrolled-course-progress">${course.progress_percent || 0}% پیشرفت</div>
+        </div>
+    `).join('');
+}
+
+// Change password
+document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const old_password = document.getElementById('oldPassword').value;
+    const new_password = document.getElementById('newPassword').value;
+    const confirm_new_password = document.getElementById('confirmPassword').value;
+    
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    document.getElementById('passwordMessage').innerHTML = '';
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/account/change-password/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ old_password, new_password, confirm_new_password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('passwordMessage').innerHTML = `
+                <div style="background: #10b981; color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                    ✅ رمز عبور با موفقیت تغییر کرد
+                </div>
+            `;
+            document.getElementById('changePasswordForm').reset();
+        } else {
+            if (data.new_password) {
+                document.getElementById('newPasswordError').textContent = data.new_password[0];
+            }
+            if (data.non_field_errors) {
+                document.getElementById('passwordMessage').innerHTML = `
+                    <div style="background: #dc2626; color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                        ❌ ${data.non_field_errors[0]}
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+// Logout
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+        await fetch(`${API_BASE_URL}/api/account/logout/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        localStorage.removeItem('auth_token');
+        document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        window.location.href = '/account/login/';
+    }
+});
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load data
+loadProfile();
+loadEnrolledCourses();
+</script>
+{% endblock %}
