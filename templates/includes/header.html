@@ -1,135 +1,212 @@
 <!-- templates/includes/header.html -->
 {% load static %}
-<nav class="navbar">
+<nav class="navbar" id="navbar">
     <div class="nav-container">
         <div class="logo">
+            <i class="fas fa-graduation-cap logo-icon"></i>
             <span class="logo-text">سبزلرن</span>
         </div>
+        
         <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="جستجوی دوره‌ها...">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="جستجوی دوره‌ها، مقالات، اساتید...">
         </div>
+        
         <div class="nav-links" id="navLinks">
-            <a href="/">صفحه اصلی</a>
-            <a href="#">دوره‌ها</a>
-            <a href="#">مقالات</a>
-            <a href="#">تماس با ما</a>
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> صفحه اصلی</a>
+            <a href="#" class="nav-link"><i class="fas fa-book"></i> دوره‌ها</a>
+            <a href="#" class="nav-link"><i class="fas fa-newspaper"></i> مقالات</a>
+            <a href="#" class="nav-link"><i class="fas fa-envelope"></i> تماس با ما</a>
             <button id="gradientSwitchBtn" class="gradient-switch-header" title="تغییر تم">
-                🎨
+                <i class="fas fa-palette"></i>
             </button>
-            <!-- لینک‌های داینامیک احراز هویت اینجا قرار می‌گیرند -->
-            <div id="authLinks" style="display: inline-flex; gap: 1rem; margin-right: 0.5rem;"></div>
+            <div id="authLinks" class="auth-links"></div>
         </div>
+        
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
 </nav>
 
 <section class="hero" id="heroSection">
-    <h1>برنامه‌نویسی رو شروع کن!</h1>
-    <p>مسیر شغلی‌ات رو با دوره‌های تخصصی ما بساز</p>
-    <div class="stats">
-        <div class="stat-box">📚 80+ موضوع مختلف</div>
-        <div class="stat-box">💼 آموزش ویژه بازار کار</div>
-        <div class="stat-box">🤖 مجهز به هوش مصنوعی</div>
+    <div class="hero-content">
+        <h1 class="hero-title">برنامه‌نویسی رو <span class="highlight">حرفه‌ای</span> شروع کن!</h1>
+        <p class="hero-subtitle">مسیر شغلی‌ات رو با دوره‌های تخصصی و پروژه‌محور ما بساز</p>
+        <div class="stats">
+            <div class="stat-box">
+                <i class="fas fa-chalkboard"></i>
+                <span class="stat-number">80+</span>
+                <span class="stat-label">دوره تخصصی</span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-briefcase"></i>
+                <span class="stat-number">100%</span>
+                <span class="stat-label">مناسب بازار کار</span>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-robot"></i>
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">پشتیبانی هوشمند</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-wave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
     </div>
 </section>
 
 <script>
-// ========== تم‌ها (دست نخورده) ==========
-const themes = [
-    { name: 'night', className: 'theme-night', heroClass: 'night', title: 'تم شب' },
-    { name: 'coffee', className: 'theme-coffee', heroClass: 'coffee', title: 'تم قهوه' },
-    { name: 'emerald', className: 'theme-emerald', heroClass: 'emerald', title: 'تم زمرد' }
-];
-
-let currentTheme = localStorage.getItem('siteTheme') || 'night';
-
-function changeTheme() {
-    const body = document.body;
-    const hero = document.getElementById('heroSection');
-    
-    let currentIndex = themes.findIndex(t => t.name === currentTheme);
-    let nextIndex = (currentIndex + 1) % themes.length;
-    let nextTheme = themes[nextIndex];
-    
-    body.classList.remove('theme-night', 'theme-coffee', 'theme-emerald');
-    hero.classList.remove('night', 'coffee', 'emerald');
-    
-    body.classList.add(nextTheme.className);
-    hero.classList.add(nextTheme.heroClass);
-    
-    currentTheme = nextTheme.name;
-    localStorage.setItem('siteTheme', currentTheme);
-    
-    const btn = document.getElementById('gradientSwitchBtn');
-    if (btn) {
-        btn.title = `تغییر به ${nextTheme.title}`;
+// Theme Manager Class
+class ThemeManager {
+    constructor() {
+        this.themes = [
+            { name: 'night', className: 'theme-night', icon: 'fa-moon', title: 'تم شب' },
+            { name: 'coffee', className: 'theme-coffee', icon: 'fa-mug-hot', title: 'تم قهوه' },
+            { name: 'emerald', className: 'theme-emerald', icon: 'fa-gem', title: 'تم زمرد' }
+        ];
+        this.currentTheme = localStorage.getItem('siteTheme') || 'night';
+        this.init();
     }
-}
-
-// تنظیم تم ذخیره شده
-function initTheme() {
-    const body = document.body;
-    const hero = document.getElementById('heroSection');
-    const savedTheme = localStorage.getItem('siteTheme') || 'night';
-    const theme = themes.find(t => t.name === savedTheme) || themes[0];
     
-    body.classList.add(theme.className);
-    hero.classList.add(theme.heroClass);
-    currentTheme = theme.name;
-    
-    const btn = document.getElementById('gradientSwitchBtn');
-    if (btn) {
-        btn.addEventListener('click', changeTheme);
+    init() {
+        this.applyTheme(this.currentTheme);
+        const btn = document.getElementById('gradientSwitchBtn');
+        if (btn) {
+            btn.addEventListener('click', () => this.cycleTheme());
+        }
     }
-}
-
-// ========== احراز هویت (Authentication) ==========
-function updateAuthLinks() {
-    const token = localStorage.getItem('auth_token');
-    const authLinksDiv = document.getElementById('authLinks');
     
-    if (!authLinksDiv) return;
-    
-    if (token) {
-        // کاربر لاگین کرده - نمایش پروفایل و خروج
-        authLinksDiv.innerHTML = `
-            <a href="/account/profile/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">پروفایل</a>
-            <a href="#" id="logoutNavBtn" style="color: #dc2626; text-decoration: none; font-weight: 500; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">خروج</a>
-        `;
+    applyTheme(themeName) {
+        const theme = this.themes.find(t => t.name === themeName);
+        if (!theme) return;
         
-        // اضافه کردن رویداد خروج
-        const logoutBtn = document.getElementById('logoutNavBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    await fetch('http://127.0.0.1:8000/api/account/logout/', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Token ${token}`
-                        }
-                    });
-                } catch (error) {
-                    console.error('Logout error:', error);
-                } finally {
-                    localStorage.removeItem('auth_token');
-                    localStorage.removeItem('user_phone');
-                    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-                    window.location.href = '/';
-                }
+        const body = document.body;
+        const hero = document.getElementById('heroSection');
+        
+        // Remove existing theme classes
+        this.themes.forEach(t => {
+            body.classList.remove(t.className);
+            if (hero) hero.classList.remove(t.name);
+        });
+        
+        // Add new theme classes
+        body.classList.add(theme.className);
+        if (hero) hero.classList.add(theme.name);
+        
+        // Update button icon
+        const btn = document.getElementById('gradientSwitchBtn');
+        if (btn) {
+            btn.innerHTML = `<i class="fas ${theme.icon}"></i>`;
+            btn.title = `تغییر به ${this.getNextTheme().title}`;
+        }
+        
+        this.currentTheme = themeName;
+        localStorage.setItem('siteTheme', themeName);
+    }
+    
+    getNextTheme() {
+        const currentIndex = this.themes.findIndex(t => t.name === this.currentTheme);
+        const nextIndex = (currentIndex + 1) % this.themes.length;
+        return this.themes[nextIndex];
+    }
+    
+    cycleTheme() {
+        const nextTheme = this.getNextTheme();
+        this.applyTheme(nextTheme.name);
+    }
+}
+
+// Auth Manager Class
+class AuthManager {
+    constructor() {
+        this.apiBase = 'http://127.0.0.1:8000';
+        this.init();
+    }
+    
+    init() {
+        this.updateAuthLinks();
+    }
+    
+    async updateAuthLinks() {
+        const token = localStorage.getItem('auth_token');
+        const authLinksDiv = document.getElementById('authLinks');
+        
+        if (!authLinksDiv) return;
+        
+        if (token) {
+            authLinksDiv.innerHTML = `
+                <a href="/account/profile/" class="auth-link profile-link">
+                    <i class="fas fa-user-circle"></i>
+                    پروفایل
+                </a>
+                <button id="logoutNavBtn" class="auth-link logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    خروج
+                </button>
+            `;
+            
+            const logoutBtn = document.getElementById('logoutNavBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => this.handleLogout(e, token));
+            }
+        } else {
+            authLinksDiv.innerHTML = `
+                <a href="/account/login/" class="auth-link login-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </a>
+                <a href="/account/register/" class="auth-link register-link">
+                    <i class="fas fa-user-plus"></i>
+                    ثبت نام
+                </a>
+            `;
+        }
+    }
+    
+    async handleLogout(event, token) {
+        event.preventDefault();
+        try {
+            await fetch(`${this.apiBase}/api/account/logout/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Token ${token}` }
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_phone');
+            document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            window.location.href = '/';
+        }
+    }
+}
+
+// Mobile Menu Manager
+class MobileMenuManager {
+    constructor() {
+        this.init();
+    }
+    
+    init() {
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (menuBtn && navLinks) {
+            menuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                menuBtn.classList.toggle('active');
             });
         }
-    } else {
-        // کاربر لاگین نکرده - نمایش ورود و ثبت نام
-        authLinksDiv.innerHTML = `
-            <a href="/account/login/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">ورود</a>
-            <a href="/account/register/" style="color: #1e293b; text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='#1e293b'">ثبت نام</a>
-        `;
     }
 }
 
-// ========== اجرای اولیه ==========
-document.addEventListener('DOMContentLoaded', function() {
-    initTheme();        // راه‌اندازی تم
-    updateAuthLinks();  // راه‌اندازی لینک‌های احراز هویت
+// Initialize all managers
+document.addEventListener('DOMContentLoaded', () => {
+    new ThemeManager();
+    new AuthManager();
+    new MobileMenuManager();
 });
 </script>

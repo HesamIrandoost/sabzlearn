@@ -329,15 +329,24 @@ async function loadCourseDetail() {
     }
 }
 
+
+
 function displayCourseDetail(course) {
     const container = document.getElementById('courseDetail');
     const hasDiscount = course.discount_percent > 0;
     const finalPrice = course.final_price;
     const isEnrolled = course.is_enrolled;
     
+    // ساخت آدرس تصویر دوره
+    const courseImage = course.image || course.cover || null;
+    const imageHtml = courseImage ? 
+        `<img src="${courseImage}" alt="${escapeHtml(course.title)}" class="course-detail-img">` :
+        `<div class="course-image-placeholder">📚</div>`;
+    
     // گرفتن نام مدرس از instructor profile
     let instructorName = 'مدرس';
     let instructorBio = 'مدرس حرفه‌ای برنامه‌نویسی';
+    let instructorImage = null;
     
     if (course.instructor) {
         if (course.instructor.first_name && course.instructor.last_name) {
@@ -351,12 +360,20 @@ function displayCourseDetail(course) {
         if (course.instructor.bio) {
             instructorBio = course.instructor.bio;
         }
+        
+        if (course.instructor.profile_image) {
+            instructorImage = course.instructor.profile_image;
+        }
     }
+    
+    const instructorImageHtml = instructorImage ? 
+        `<img src="${instructorImage}" alt="${escapeHtml(instructorName)}" class="instructor-avatar-img">` :
+        `<div class="instructor-avatar">👨‍🏫</div>`;
     
     container.innerHTML = `
         <div class="course-main">
             <div class="course-image-main">
-                📚
+                ${imageHtml}
             </div>
             <div class="course-header">
                 <h1>${escapeHtml(course.title)}</h1>
@@ -420,14 +437,13 @@ function displayCourseDetail(course) {
                 </button>
             </div>
             <div class="instructor-card">
-                <div class="instructor-avatar">👨‍🏫</div>
+                ${instructorImageHtml}
                 <div class="instructor-name">${escapeHtml(instructorName)}</div>
                 <div class="instructor-bio">${escapeHtml(instructorBio)}</div>
             </div>
         </div>
     `;
 }
-
 function toggleSection(element) {
     element.classList.toggle('open');
 }
