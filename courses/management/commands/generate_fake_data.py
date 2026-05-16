@@ -10,7 +10,7 @@ from courses.models import Course, Section, Video, Enrollment, VideoProgress
 
 class Command(BaseCommand):
     help = 'insert persian dummy data'
- 
+    
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.fake = Faker('fa_IR')

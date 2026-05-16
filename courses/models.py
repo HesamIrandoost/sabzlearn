@@ -1,17 +1,19 @@
+# Courses/model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from accounts.models import User
-# from accounts.models import User
+from accounts.models import User, InstructorProfile
+from django.utils.text import slugify
+
 
 class Course(models.Model):
     instructor = models.ForeignKey(
-        User, 
+        InstructorProfile,
         on_delete=models.CASCADE,
         related_name='courses',
-        limit_choices_to={'role': 'instructor', 'is_instructor_approved': True}
+        limit_choices_to={'is_verified': True}
     )
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)  # برای SEO
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
     description = models.TextField()
     price = models.PositiveIntegerField(default=0, help_text="قیمت به تومان")
     discount_percent = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
@@ -26,6 +28,18 @@ class Course(models.Model):
             models.Index(fields=['slug']),
             models.Index(fields=['-created_at']),
         ]
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            # اگه اسلاگ تکراری بود، شماره بهش اضافه کن
+            while Course.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
     
     @property
     def final_price(self):
@@ -44,6 +58,9 @@ class Course(models.Model):
     
     def __str__(self):
         return self.title
+
+
+
 
 class Section(models.Model):
     course = models.ForeignKey(

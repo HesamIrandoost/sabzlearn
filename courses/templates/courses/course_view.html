@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آکادمی برنامه‌نویسی سبزلرن | از صفر تا استخدام</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tahoma', 'Verdana', sans-serif;
+            background: #f9fafb;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.75rem 1rem;
+        }
+        
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1.5rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            background: #f8fafc;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+        }
+        
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #7c3aed;
+        }
+        
+        /* Hero Section - شبیه سبزلرن */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5rem 1rem 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.3;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            position: relative;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            padding: 0.75rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        /* Filters - کارت سفید با سایه */
+        .filters {
+            max-width: 1280px;
+            margin: -2.5rem auto 2.5rem;
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5568;
+        }
+        
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #fafcff;
+        }
+        
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #7c3aed;
+            color: white;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+        }
+        
+        .btn-primary:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        /* Section Title - مثل سبزلرن */
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: #1e293b;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .section-title span {
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Courses Grid */
+        .courses-container {
+            max-width: 1280px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 2rem;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.15);
+            border-color: #e0e7ff;
+        }
+        
+        .course-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 52px;
+            position: relative;
+        }
+        
+        .discount-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #f97316, #dc2626);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .course-content {
+            padding: 1.25rem;
+        }
+        
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #0f172a;
+            line-height: 1.4;
+        }
+        
+        .instructor {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .course-price {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #eef2ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price {
+            color: #7c3aed;
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+        
+        .old-price {
+            text-decoration: line-through;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+        
+        .buy-btn {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .buy-btn:hover {
+            background: #6d28d9;
+            transform: scale(1.02);
+        }
+        
+        /* Loading & Error */
+        .loading, .error, .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 24px;
+            margin: 2rem 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 2.5rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .search-box {
+                max-width: 100%;
+                margin: 0;
+                width: 100%;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .stats {
+                gap: 0.8rem;
+            }
+            .stat-box {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .filters {
+                padding: 1rem;
+                margin-top: -2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <span class="logo-icon">💜</span>
+            <span class="logo-text">سبزلرن</span>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="جستجوی دوره‌ها...">
+        </div>
+        <div class="nav-links">
+            <a href="#">صفحه اصلی</a>
+            <a href="#">دوره‌ها</a>
+            <a href="#">مقالات</a>
+            <a href="#">تماس با ما</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>برنامه‌نویسی رو شروع کن!</h1>
+    <p>مسیر شغلی‌ات رو با دوره‌های تخصصی ما بساز</p>
+    <div class="stats">
+        <div class="stat-box">📚 80+ موضوع مختلف</div>
+        <div class="stat-box">💼 آموزش ویژه بازار کار</div>
+        <div class="stat-box">🤖 مجهز به هوش مصنوعی</div>
+    </div>
+</section>
+
+<div class="filters">
+    <div class="filter-grid">
+        <div class="filter-group">
+            <label>💰 حداقل قیمت (تومان)</label>
+            <input type="number" id="minPrice" placeholder="از ۰">
+        </div>
+        <div class="filter-group">
+            <label>💰 حداکثر قیمت (تومان)</label>
+            <input type="number" id="maxPrice" placeholder="تا هر قیمت">
+        </div>
+        <div class="filter-group">
+            <label>📊 مرتب‌سازی</label>
+            <select id="sortBy">
+                <option value="-created_at">جدیدترین</option>
+                <option value="price">ارزان‌ترین</option>
+                <option value="-price">گران‌ترین</option>
+            </select>
+        </div>
+    </div>
+    <div style="margin-top: 1.2rem; display: flex; gap: 0.8rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" id="resetBtn">ریست فیلترها</button>
+        <button class="btn btn-primary" id="applyBtn">اعمال فیلتر</button>
+    </div>
+</div>
+
+<div class="courses-container">
+    <h2 class="section-title">🔥 <span>آخرین دوره‌های سبزلرن</span></h2>
+    
+    <div id="loading" class="loading">
+        <div style="font-size: 1.2rem;">⏳ در حال بارگذاری دوره‌ها...</div>
+    </div>
+    
+    <div id="error" class="error hidden">
+        <div style="color: #dc2626; margin-bottom: 1rem;">❌ خطا در دریافت اطلاعات از سرور</div>
+        <button class="btn btn-primary" onclick="fetchCourses()">تلاش مجدد</button>
+    </div>
+    
+    <div id="coursesGrid" class="courses-grid"></div>
+    
+    <div id="noResults" class="no-results hidden">
+        <div style="font-size: 1.1rem; color: #64748b;">🔍 هیچ دوره‌ای با این شرایط پیدا نشد!</div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2025 آکادمی برنامه‌نویسی سبزلرن | از صفر تا استخدام</p>
+    <p style="font-size: 0.8rem; margin-top: 0.5rem;">آموزش ویژه بازار کار با پشتیبانی مادام‌العمر</p>
+</footer>
+
+<script>
+    // آدرس API خودت رو اینجا ست کن
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+    
+    let filters = {
+        search: '',
+        min_price: null,
+        max_price: null,
+        ordering: '-created_at'
+    };
+    
+    async function fetchCourses() {
+        const loadingDiv = document.getElementById('loading');
+        const gridDiv = document.getElementById('coursesGrid');
+        const errorDiv = document.getElementById('error');
+        const noResultsDiv = document.getElementById('noResults');
+        
+        loadingDiv.classList.remove('hidden');
+        gridDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+        noResultsDiv.classList.add('hidden');
+        
+        const params = new URLSearchParams();
+        if (filters.search) params.append('search', filters.search);
+        if (filters.min_price) params.append('min_price', filters.min_price);
+        if (filters.max_price) params.append('max_price', filters.max_price);
+        if (filters.ordering) params.append('ordering', filters.ordering);
+        
+        const url = `${API_BASE_URL}/api/course/?${params.toString()}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network error');
+            const data = await response.json();
+            displayCourses(data);
+        } catch (error) {
+            console.error('Fetch error:', error);
+            loadingDiv.classList.add('hidden');
+            errorDiv.classList.remove('hidden');
+        }
+    }
+    
+    function displayCourses(courses) {
+        const loadingDiv = document.getElementById('loading');
+        const gridDiv = document.getElementById('coursesGrid');
+        const noResultsDiv = document.getElementById('noResults');
+        
+        loadingDiv.classList.add('hidden');
+        
+        if (!courses || courses.length === 0) {
+            gridDiv.classList.add('hidden');
+            noResultsDiv.classList.remove('hidden');
+            return;
+        }
+        
+        gridDiv.classList.remove('hidden');
+        noResultsDiv.classList.add('hidden');
+        
+        gridDiv.innerHTML = courses.map(course => {
+            const hasDiscount = course.discount_percent && course.discount_percent > 0;
+            const finalPrice = course.final_price || course.price;
+            
+            return `
+                <div class="course-card">
+                    <div class="course-image">
+                        📘
+                        ${hasDiscount ? `<span class="discount-badge">🔥 ${course.discount_percent}٪ تخفیف</span>` : ''}
+                    </div>
+                    <div class="course-content">
+                        <div class="course-title">${escapeHtml(course.title)}</div>
+                        <div class="instructor">
+                            👨‍🏫 مدرس: ${escapeHtml(course.instructor_name || 'سبزلرن')}
+                        </div>
+                        <div class="course-price">
+                            <div>
+                                ${hasDiscount ? `<span class="old-price">${formatPrice(course.price)} تومان</span>` : ''}
+                                <span class="price">${formatPrice(finalPrice)} تومان</span>
+                            </div>
+                            <button class="buy-btn">خرید دوره</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function formatPrice(price) {
+        if (!price && price !== 0) return '۰';
+        return price.toLocaleString('fa-IR');
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function applyFilters() {
+        filters.search = document.getElementById('searchInput').value;
+        filters.min_price = document.getElementById('minPrice').value || null;
+        filters.max_price = document.getElementById('maxPrice').value || null;
+        filters.ordering = document.getElementById('sortBy').value;
+        fetchCourses();
+    }
+    
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('minPrice').value = '';
+        document.getElementById('maxPrice').value = '';
+        document.getElementById('sortBy').value = '-created_at';
+        filters = {
+            search: '',
+            min_price: null,
+            max_price: null,
+            ordering: '-created_at'
+        };
+        fetchCourses();
+    }
+    
+    document.getElementById('applyBtn').addEventListener('click', applyFilters);
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filters.search = e.target.value;
+            fetchCourses();
+        }, 500);
+    });
+    
+    // اجرای اولیه
+    fetchCourses();
+</script>
+
+</body>
+</html>

@@ -26,7 +26,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/account/', include('accounts.api.urls')),
     path('api/course/', include('courses.api.urls')),
-    
+
+    path('', include('courses.urls')),
+
+
     path('api-auth/', include('rest_framework.urls')),  # برای تست در براوزر
     # Swagger UI
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

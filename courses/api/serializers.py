@@ -1,7 +1,7 @@
 # courses/serializers.py
 from rest_framework import serializers
 from ..models import Course, Section, Video, Enrollment, VideoProgress
-from accounts.models import User
+from accounts.models import User, InstructorProfile
 from datetime import timezone
 
 class UserSimpleSerializer(serializers.ModelSerializer):
@@ -30,22 +30,37 @@ class SectionSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'order', 'total_duration', 'videos']
         read_only_fields = ['id']
 
+
+class InstructorSimpleSerializer(serializers.ModelSerializer):
+    """سریالایزر ساده برای نمایش اطلاعات مدرس از InstructorProfile"""
+    phone = serializers.ReadOnlyField(source='user.phone')
+    email = serializers.ReadOnlyField(source='user.email')
+    
+    class Meta:
+        model = InstructorProfile
+        fields = ['id', 'first_name', 'last_name', 'phone', 'email', 'profile_image', 'bio']
+
 class CourseListSerializer(serializers.ModelSerializer):
     """سریالایزر برای لیست دوره‌ها (خلاصه)"""
-    instructor_phone = serializers.ReadOnlyField(source='instructor.phone')
+    instructor_name = serializers.SerializerMethodField()
+    instructor_phone = serializers.ReadOnlyField(source='instructor.user.phone')
     final_price = serializers.ReadOnlyField()
     
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'slug', 'instructor_phone', 
+            'id', 'title', 'slug', 'instructor_name', 'instructor_phone',
             'price', 'discount_percent', 'final_price', 
             'image', 'is_published', 'created_at'
         ]
+    
+    def get_instructor_name(self, obj):
+        """گرفتن نام و نام خانوادگی از InstructorProfile"""
+        return f"{obj.instructor.first_name} {obj.instructor.last_name}"
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     """سریالایزر برای جزییات دوره (کامل)"""
-    instructor = UserSimpleSerializer(read_only=True)
+    instructor = InstructorSimpleSerializer(read_only=True)  # تغییر به InstructorSimpleSerializer
     sections = SectionSerializer(many=True, read_only=True)
     final_price = serializers.ReadOnlyField()
     total_duration = serializers.ReadOnlyField()
@@ -83,6 +98,8 @@ class CourseDetailSerializer(serializers.ModelSerializer):
                 ).count()
                 return int((watched_videos / total_videos) * 100)
         return 0
+
+
 
 class CourseCreateUpdateSerializer(serializers.ModelSerializer):
     """سریالایزر برای ایجاد و بروزرسانی دوره (فقط مدرس)"""

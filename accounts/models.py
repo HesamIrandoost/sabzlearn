@@ -1,3 +1,4 @@
+# accounts/model
 from django.db import models
 
 # Create your models here.
@@ -92,4 +93,4 @@ class InstructorProfile(models.Model):
     total_courses = models.IntegerField(default=0)
     
     def __str__(self):
-        return f"Instructor: {self.user.phone}"
+        return f"Instructor: {self.first_name} {self.last_name}"

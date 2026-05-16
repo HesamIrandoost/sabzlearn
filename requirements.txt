@@ -10,3 +10,4 @@ typing_extensions==4.15.0
 django-extensions
 factory-boy 
 faker
+djoser
