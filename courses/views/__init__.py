@@ -1,5 +1,5 @@
 from .course_views import CourseListView, CourseDetailView, InstructorCourseListView, InstructorCourseDetailView
-from .enrollment_views import EnrollCourseView, CourseContentAccessView, MyCoursesView
+from .enrollment_views import VideoStreamView, EnrollCourseView, CourseContentAccessView, MyCoursesView
 from .progress_views import UpdateVideoProgressView
 from .section_views import SectionDetailView, SectionListView
 from .video_views import VideoListView

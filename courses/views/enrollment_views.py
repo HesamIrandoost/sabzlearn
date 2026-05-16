@@ -30,6 +30,46 @@ class EnrollCourseView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class VideoStreamView(APIView):
+    """دریافت اطلاعات ویدیو برای پخش"""
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, course_slug, video_id):
+        # گرفتن دوره و ویدیو
+        course = get_object_or_404(Course, slug=course_slug, is_published=True)
+        video = get_object_or_404(Video, id=video_id, section__course=course)
+        
+        # بررسی دسترسی
+        user = request.user
+        has_access = False
+        
+        if video.is_free:
+            has_access = True
+        elif user.is_authenticated:
+            has_access = Enrollment.objects.filter(student=user, course=course).exists()
+        
+        if not has_access:
+            return Response({
+                'error': 'شما به این ویدیو دسترسی ندارید',
+                'need_purchase': not video.is_free
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        # آدرس کامل ویدیو
+        video_url = None
+        if video.video_file:
+            video_url = request.build_absolute_uri(video.video_file.url)
+        
+        return Response({
+            'id': video.id,
+            'title': video.title,
+            'video_url': video_url,
+            'duration': video.duration,
+            'duration_minutes': video.duration_minutes,
+            'is_free': video.is_free,
+            'course_title': course.title,
+            'course_slug': course.slug,
+        })
+
 class CourseContentAccessView(APIView):
     """دسترسی به محتوای دوره (بررسی ثبت‌نام یا رایگان بودن)"""
     permission_classes = [permissions.IsAuthenticated]

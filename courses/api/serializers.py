@@ -9,18 +9,27 @@ class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['phone', 'email']
+# serializers.py
 
 class VideoSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.ReadOnlyField()
+    video_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Video
         fields = [
-            'id', 'title', 'video_file', 'duration', 
+            'id', 'title', 'video_file', 'video_url', 'duration', 
             'duration_minutes', 'is_free', 'order', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-
+    
+    def get_video_url(self, obj):
+        """برگرداندن آدرس کامل ویدیو"""
+        if obj.video_file:
+            return obj.video_file.url
+        return None
+    
+    
 class SectionSerializer(serializers.ModelSerializer):
     videos = VideoSerializer(many=True, read_only=True)
     total_duration = serializers.ReadOnlyField()

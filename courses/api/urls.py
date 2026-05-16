@@ -8,7 +8,8 @@ from courses.views.course_views import (
 from courses.views.enrollment_views import (
     EnrollCourseView, 
     CourseContentAccessView, 
-    MyCoursesView
+    MyCoursesView,
+    VideoStreamView
 )
 from courses.views.progress_views import UpdateVideoProgressView
 from courses.views.section_views import SectionDetailView, SectionListView
@@ -22,10 +23,14 @@ urlpatterns = [
     path('<slug:slug>/', CourseDetailView.as_view(), name='course_detail'),
     
     # دسترسی به محتوا
-    path('<slug:course_slug>/video/<int:video_id>/', 
+    path('2/<slug:course_slug>/video/<int:video_id>/', 
          CourseContentAccessView.as_view(), 
          name='course_content'),
     
+    path('<slug:course_slug>/video/<int:video_id>/', 
+         VideoStreamView.as_view(), 
+         name='video-stream'),
+
     # مدرس: مدیریت دوره‌ها
     path('instructor/courses/', 
          InstructorCourseListView.as_view(), 
