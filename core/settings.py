@@ -41,8 +41,11 @@ INSTALLED_APPS = [
     'drf_yasg',
     "rest_framework",
     "rest_framework.authtoken",
+    
     "accounts.apps.AccountsConfig",
     "courses.apps.CoursesConfig",
+    "articles.apps.ArticlesConfig",
+    
     'django_extensions'
     
 ]

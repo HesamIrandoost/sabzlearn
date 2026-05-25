@@ -1,2 +1,4 @@
+model article
+
 test
 casheing
