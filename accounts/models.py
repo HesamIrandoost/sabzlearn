@@ -77,6 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
+    # user_name = models.CharField(max_length=50, unique=True)
     wallet_balance = models.BigIntegerField(default=0)
     
     def __str__(self):

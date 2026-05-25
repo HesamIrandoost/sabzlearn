@@ -156,3 +156,18 @@ class VideoProgress(models.Model):
     
     def __str__(self):
         return f"{self.enrollment.student.phone} - {self.video.title}"
+    
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    text = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+       
+    def __str__(self):
+        return f"{self.user}"
+    
+
+# class Preq(models.Model):
+#     prev_course = models.OneToOneField(Course, many=True, on_delete=models.CASCADE)
+#     current_course = models.ForeignKey(Course, on_delete=models.CASCADE)

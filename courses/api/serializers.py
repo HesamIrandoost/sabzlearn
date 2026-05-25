@@ -1,6 +1,6 @@
 # courses/serializers.py
 from rest_framework import serializers
-from ..models import Course, Section, Video, Enrollment, VideoProgress
+from ..models import Course, Section, Video, Enrollment, VideoProgress, Comment
 from accounts.models import User, InstructorProfile
 from datetime import timezone
 
@@ -9,7 +9,6 @@ class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['phone', 'email']
-# serializers.py
 
 class VideoSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.ReadOnlyField()
@@ -67,12 +66,27 @@ class CourseListSerializer(serializers.ModelSerializer):
         """گرفتن نام و نام خانوادگی از InstructorProfile"""
         return f"{obj.instructor.first_name} {obj.instructor.last_name}"
 
+
+class CommentSerializer(serializers.ModelSerializer):
+    user_phone = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Comment
+        fields = ['id', 'user_phone', 'text', 'created_at']
+    
+    def get_user_phone(self, obj):
+        return obj.user.phone
+
+
 class CourseDetailSerializer(serializers.ModelSerializer):
     """سریالایزر برای جزییات دوره (کامل)"""
-    instructor = InstructorSimpleSerializer(read_only=True)  # تغییر به InstructorSimpleSerializer
+    instructor = InstructorSimpleSerializer(read_only=True)  
+    comment = CommentSerializer(many=True ,read_only=True, source='comment_set')  
     sections = SectionSerializer(many=True, read_only=True)
+
     final_price = serializers.ReadOnlyField()
     total_duration = serializers.ReadOnlyField()
+    
     is_enrolled = serializers.SerializerMethodField()
     progress_percent = serializers.SerializerMethodField()
     
@@ -82,7 +96,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'description', 'instructor',
             'price', 'discount_percent', 'final_price', 'image',
             'sections', 'total_duration', 'is_published',
-            'is_enrolled', 'progress_percent', 'created_at', 'updated_at'
+            'is_enrolled', 'progress_percent', 'comment', 'created_at', 'updated_at'
         ]
     
     def get_is_enrolled(self, obj):

@@ -1,7 +1,7 @@
 from ..api.serializers import CourseListSerializer, CourseDetailSerializer, CourseCreateUpdateSerializer
 from rest_framework import generics
 from rest_framework import permissions
-from ..models import Course 
+from ..models import Course, Comment
 from core.permissons import IsInstructor
 from django.db.models import Q
 from rest_framework.decorators import action
@@ -44,7 +44,7 @@ class CourseListView(generics.ListAPIView):
         
         return queryset
 
-
+from django.db.models import Prefetch
 class CourseDetailView(generics.RetrieveAPIView):
     """جزییات یک دوره"""
     serializer_class = CourseDetailSerializer
@@ -52,7 +52,9 @@ class CourseDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
     
     def get_queryset(self):
-        return Course.objects.filter(is_published=True)
+       return Course.objects.filter(is_published=True).prefetch_related(
+            Prefetch('comment_set', queryset=Comment.objects.select_related('user').order_by('-created_at'))
+        )
     
 
 class InstructorCourseListView(generics.ListCreateAPIView):
