@@ -36,7 +36,7 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ['course', 'title','order']
 @admin.register(models.Video)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['section', 'title', 'duration', 'is_free', 'order', 'created_at']
+    list_display = ['pk', 'section', 'title', 'duration', 'is_free', 'order', 'created_at']
 @admin.register(models.VideoProgress)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['enrollment', 'video', 'is_watched', 'last_position']
