@@ -2,8 +2,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from faker import Faker
-import random
-from core import settings
+from core.settings import base as settings
 from django.core.files.base import ContentFile
 from django.core.files import File
 import os
