@@ -3,8 +3,8 @@
 ## Quick Setup
 
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/sabzlearn.git
-cd sabzlearn
+git clone https://github.com/ErenYeager08/sabzlearn.git
+- cd sabzlearn
 
 # Setup virtual environment
 python -m venv venv
