@@ -11,6 +11,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
         fields = ['phone', 'email']
 
 class VideoSerializer(serializers.ModelSerializer):
+    """Serializer for Video model with computed fields for duration and URL"""
     duration_minutes = serializers.ReadOnlyField()
     video_url = serializers.SerializerMethodField()
     
@@ -30,6 +31,7 @@ class VideoSerializer(serializers.ModelSerializer):
     
     
 class SectionSerializer(serializers.ModelSerializer):
+    """Serializer for Section model with nested videos and total duration"""
     videos = VideoSerializer(many=True, read_only=True)
     total_duration = serializers.ReadOnlyField()
     
@@ -68,6 +70,7 @@ class CourseListSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for Comment model with user phone information"""
     user_phone = serializers.SerializerMethodField()
     
     class Meta:
@@ -139,6 +142,7 @@ class CourseCreateUpdateSerializer(serializers.ModelSerializer):
         return value
 
 class EnrollmentSerializer(serializers.ModelSerializer):
+    """Serializer for Enrollment model with course details and progress tracking"""
     course_title = serializers.ReadOnlyField(source='course.title')
     course_image = serializers.ReadOnlyField(source='course.image')
     progress_percent = serializers.SerializerMethodField()
@@ -164,6 +168,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         return int((watched_videos / total_videos) * 100)
 
 class VideoProgressSerializer(serializers.ModelSerializer):
+    """Serializer for VideoProgress model tracking user's video viewing progress"""
     video_title = serializers.ReadOnlyField(source='video.title')
     video_duration = serializers.ReadOnlyField(source='video.duration')
     

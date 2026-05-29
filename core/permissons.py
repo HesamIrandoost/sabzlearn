@@ -6,6 +6,7 @@ class IsSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_superuser
 
+
 class IsAdminUser(permissions.BasePermission):
     """ادمین ضعیف یا قوی (هر کسی که role=admin یا is_superuser=True)"""
     def has_permission(self, request, view):

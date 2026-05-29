@@ -18,23 +18,24 @@ from courses.views.video_views import VideoListView
 app_name = 'courses'
 
 urlpatterns = [
-    # عمومی
+    # عمومی: مشاهده دوره‌ها
     path('', CourseListView.as_view(), name='course_list'),
     path('<slug:slug>/', CourseDetailView.as_view(), name='course_detail'),
     
-    # دسترسی به محتوا
-    path('2/<slug:course_slug>/video/<int:video_id>/', 
-         CourseContentAccessView.as_view(), 
-         name='course_content'),
-    
+    # استریم ویدیو های رایگان
     path('<slug:course_slug>/video/<int:video_id>/', 
-         VideoStreamView.as_view(), 
-         name='video-stream'),
+         CourseContentAccessView.as_view(), 
+         name='course_access'),
+     # دریافت اطلاعات ویدیو برای پخش
+    path('<slug:course_slug>/video/<int:video_id>/stream/', 
+         VideoStreamView.as_view(),
+         name='video_stream'),
 
     # مدرس: مدیریت دوره‌ها
     path('instructor/courses/', 
          InstructorCourseListView.as_view(), 
-         name='instructor_courses'),
+         name='instructor_course_list'),
+    # مدرس: جزئیات دوره (ویرایش) - شامل مدیریت سکشن‌ها و ویدیوها
     path('instructor/courses/<slug:slug>/', 
          InstructorCourseDetailView.as_view(), 
          name='instructor_course_detail'),
@@ -52,10 +53,12 @@ urlpatterns = [
          VideoListView.as_view(), 
          name='video_list'),
     
-    # دانشجو: ثبت‌نام و دوره‌های من
+    # دانشجو: ثبت‌نام در دوره
     path('enroll/<int:course_id>/', 
          EnrollCourseView.as_view(), 
          name='enroll_course'),
+    
+    # دانشجو: دوره‌های من
     path('my-courses/', 
          MyCoursesView.as_view(), 
          name='my_courses'),
@@ -63,5 +66,5 @@ urlpatterns = [
     # دانشجو: پیشرفت ویدیوها
     path('progress/<int:course_id>/video/<int:video_id>/', 
          UpdateVideoProgressView.as_view(), 
-         name='update_progress'),
+         name='update_video_progress'),
 ]
