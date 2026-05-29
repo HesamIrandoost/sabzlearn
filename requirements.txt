@@ -11,3 +11,4 @@ django-extensions
 factory-boy 
 faker
 djoser
+black
