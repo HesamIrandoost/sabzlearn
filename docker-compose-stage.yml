@@ -1,0 +1,43 @@
+services:
+  redis:
+    container_name: redis
+    image: redis:7.4-alpine 
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  backend:
+    build: .
+    container_name: backend
+    command: sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    expose:
+      - "8000"
+    environment:
+      - SECRET_KEY=test
+      - DEBUG=False
+      - DJANGO_SETTINGS_MODULE=core.settings.production  # یا core.settings.deployment
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:1.26-alpine
+    container_name: nginx
+    restart: always
+    ports: 
+      - "80:80"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+    depends_on:
+      - redis
+      - backend
+
+volumes:
+  static_volume:
+  media_volume:
